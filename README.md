@@ -1,5 +1,7 @@
 # 专业实习智能平台 · 可运行原型 v0.2
 
+在线演示：https://mortycrop-777.github.io/whu-internship-platform-demo/
+
 单文件原型，无外部依赖。直接双击 `index.html` 即可运行，也可以用本地静态服务器打开。
 
 ## 页面路由
