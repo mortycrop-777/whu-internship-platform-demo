@@ -1,0 +1,1672 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>专业实习智能平台 · 可运行原型 v0.2</title>
+<style>
+  :root{
+    --ink:#14161a; --sub:#6f757f; --mute:#8f959e; --line:#ebedf0;
+    --side:#f7f8fa; --bg:#fbfcfe; --card:#fff;
+    --blue:#3b73f5; --blue2:#5b8ff5; --soft:#eef4ff; --warm:#f2b544; --green:#2f9e6b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{color:var(--ink);background:var(--bg);font-family:Inter,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font-family:inherit}
+  a{color:inherit}
+  .app{display:flex;height:100vh;overflow:hidden}
+  .side{width:256px;flex:none;background:var(--side);border-right:1px solid var(--line);padding:18px 14px 14px;display:flex;flex-direction:column}
+  .brandline{display:flex;align-items:center;gap:9px;padding:4px 8px 16px}
+  .brandmark{width:24px;height:24px;flex:none;border-radius:50%;object-fit:cover;background:#fff;padding:1px;box-shadow:0 0 0 1px rgba(15,23,42,.06)}
+  .login-brand .brandmark{width:32px;height:32px}
+  .brandname{font-size:13px;font-weight:700}
+  .ver{margin-left:auto;font-size:9px;color:#a9b0bc;background:#fff;border:1px solid #eaedf4;border-radius:6px;padding:2px 5px}
+  .primary-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;border:0;border-radius:12px;
+    background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;
+    box-shadow:0 6px 16px rgba(59,115,245,.24)}
+  .primary-btn svg{width:15px;height:15px}
+  nav{margin-top:12px;display:flex;flex-direction:column;gap:1px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:13.5px;color:#373c43;cursor:pointer;position:relative}
+  .nav-item:hover{background:#eef0f4}
+  .nav-item.active{background:linear-gradient(90deg,#dce8ff 0%,#edf3ff 100%);color:#1a202c;font-weight:600}
+  .nav-item.active:before{content:"";position:absolute;left:-14px;top:9px;bottom:9px;width:3.5px;border-radius:0 4px 4px 0;background:var(--blue)}
+  .nav-item svg{width:17px;height:17px;color:#6d7685;flex:none}
+  .nav-item.active svg{color:#2b5cd9}
+  .nav-item .badge{margin-left:auto;font-size:10px;color:#8f959e;background:#eceef3;border-radius:5px;padding:1px 5px}
+  .divider{height:1px;background:#e9ebef;margin:16px 10px}
+  .side-label{font-size:11px;color:var(--mute);letter-spacing:.3px;margin:0 10px 8px}
+  .side-card{margin:0 4px;background:#fff;border:1px solid #e8ebf2;border-radius:12px;padding:11px 12px}
+  .side-card .big{font-size:13px;font-weight:600}
+  .side-card .small{font-size:10.5px;color:#9aa1ad;margin-top:4px;line-height:1.5}
+  .side-list{padding:0 10px}
+  .side-list-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:11.5px;color:#6f757f}
+  .side-list-row .t{color:#b0b6c0;font-size:10.5px;flex:none}
+  .side-bottom{margin-top:auto}
+  .side-foot{display:flex;align-items:center;gap:10px;padding:12px 8px 2px;border-top:1px solid #e9ebef}
+  .avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;flex:none}
+  .who .name{font-size:12.5px;font-weight:600}
+  .who .sub{font-size:10.5px;color:#9aa1ad;margin-top:1px}
+  .foot-icon{margin-left:auto;color:#9aa3b2}
+  .foot-icon svg{width:15px;height:15px}
+  .trend-list{padding:0 10px}
+  .trend-row{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:11.5px;color:#5f6b7a}
+  .trend-row .rank{width:16px;height:16px;border-radius:4px;background:#f1f3f6;color:#8f959e;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .trend-row .rank.hot{background:#fde2b8;color:#b4690e}
+  .trend-row .q{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trend-row .n{font-size:9.5px;color:#aab1bd;flex:none}
+  .announce{margin:0 4px 10px;background:#fff;border:1px solid #e8ebf2;border-radius:10px;padding:8px 10px;overflow:hidden}
+  .announce-label{display:flex;align-items:center;gap:5px;font-size:10px;color:#8f959e;margin-bottom:5px}
+  .announce-label i{width:5px;height:5px;border-radius:50%;background:var(--blue);display:inline-block}
+  .announce-track{overflow:hidden;white-space:nowrap;font-size:10.5px;color:#4f5b6b}
+  .announce-track span{display:inline-block;white-space:nowrap;animation:marquee 14s linear infinite}
+  @keyframes marquee{0%,10%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+  main{flex:1;overflow-y:auto;padding:26px 34px 40px}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .crumb{font-size:11px;color:#9aa1ad;margin-bottom:6px}
+  h1{font-size:28px;font-weight:800;letter-spacing:-.6px}
+  .sub{font-size:12.5px;color:var(--mute);margin-top:6px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{height:34px;padding:0 13px;border-radius:9px;border:1px solid #e4e8f0;background:#fff;font-size:12px;color:#5f6672;cursor:pointer}
+  a.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  a.btn svg{width:14px;height:14px}
+  .btn:hover{background:#f7f8fb}
+  .btn.primary{background:linear-gradient(135deg,var(--blue2),var(--blue));border-color:transparent;color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(59,115,245,.22)}
+  .btn.danger{color:#b3261e;border-color:#f0d3d0}
+  .btn.small{height:28px;font-size:11px;padding:0 9px}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px}
+  .kpi .k{font-size:11.5px;color:var(--mute)}
+  .kpi .n{font-size:26px;font-weight:800;letter-spacing:-.8px;margin-top:5px}
+  .kpi .d{font-size:10.5px;color:#9aa1ad;margin-top:4px;display:flex;align-items:center;gap:5px}
+  .up{color:var(--green);background:#eaf7f1;border-radius:5px;padding:1px 5px;font-weight:600}
+  .warn{color:#b4690e;background:#fdf1df;border-radius:5px;padding:1px 5px;font-weight:600}
+  .grid-2{display:grid;grid-template-columns:1.62fr 1fr;gap:12px;margin-top:12px}
+  .report-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px}
+  .report-toolbar-label{font-size:11.5px;color:var(--mute)}
+  .report-toolbar-meta{margin-left:auto;font-size:11px;color:var(--mute)}
+  .report-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .report-search{display:flex;align-items:center;gap:8px}
+  .report-search .field{width:240px}
+  .student-ledger-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;margin-bottom:12px;border:1px solid #eef1f6;border-radius:12px;background:#fafbfd}
+  .student-ledger-search{display:flex;align-items:center;gap:7px;margin-right:auto}
+  .student-ledger-search .field{width:260px;background:#fff}
+  .student-filter-panel{padding:12px;margin:0 0 12px;border:1px solid #e4ebf5;border-radius:12px;background:#f8faff}
+  .student-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .student-filter-foot{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #e8eef7}
+  .student-filter-foot .foot-note{margin-right:auto}
+  .filter-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:4px;border-radius:99px;background:#e8f0ff;color:#2b5cd9;font-size:9px}
+  .result-summary{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:11px;color:#8f959e}
+  .result-summary button{border:0;background:transparent;color:#2f6fed;font-size:11px;cursor:pointer;padding:0}
+  .report-score{font-size:12px;color:#373c43;font-weight:600;white-space:nowrap}
+  .report-score span{font-size:10px;color:#8f959e;font-weight:400;margin-left:2px}
+  .resume-file-card .card-head svg{width:16px;height:16px;color:#2f6fed}
+  .application-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .application-actions .view-action{min-width:78px}
+  .application-actions .decision-group{display:flex;align-items:center;gap:8px;margin-left:16px;padding-left:16px;border-left:1px solid #e3e8f0}
+  .btn.approve{background:#237a52;border-color:#237a52;color:#fff;font-weight:600}
+  .btn.approve:hover{background:#1b6443;border-color:#1b6443}
+  .btn.reject{background:#fff;border-color:#e6aaa4;color:#b3261e;font-weight:600}
+  .btn.reject:hover{background:#fff4f2}
+  .student-import-modal{width:760px!important}
+  .student-import-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+  .student-import-head h3{font-size:17px;margin-bottom:5px}
+  .student-import-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .import-file-box{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px dashed #cfdcf2;border-radius:12px;background:#fafcff}
+  .import-file-box strong{display:block;font-size:13px;color:#373c43}
+  .import-file-box span{display:block;font-size:11px;color:#8f959e;margin-top:4px}
+  .import-preview{max-height:310px;overflow:auto;border:1px solid #edf1f7;border-radius:10px}
+  .import-preview .table th{position:sticky;top:0;background:#fff;z-index:1}
+  .import-valid{color:#1f7a52;background:#eaf7f1}
+  .import-invalid{color:#b3261e;background:#fbeceb}
+  .report-list-foot{font-size:10.5px;color:var(--mute);margin-top:10px;text-align:right}
+  .dashboard-tabs{margin-bottom:12px}
+  .progress-stack{display:flex;height:14px;border-radius:8px;overflow:hidden;background:#f0f3f8}
+  .progress-stack span{display:block;height:100%}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#6f757f}
+  .legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+  .deadline{background:#fffaf0;border:1px solid #f5e0b8;color:#8a5a12}
+  .risk-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f2f4f7;font-size:12px;color:#373c43}
+  .risk-row:last-child{border-bottom:0}
+  .risk-row .dot{width:7px;height:7px;border-radius:50%;background:#f2b544;flex:none}
+  .risk-row .tag{margin-left:auto;font-size:10px;color:#b4690e;background:#fdf1df;border-radius:5px;padding:2px 6px}
+  .placement-grid{display:grid;grid-template-columns:1.12fr 1fr 1.12fr;gap:12px;margin-top:12px;align-items:start}
+  .donut-wrap{display:flex;align-items:center;gap:18px}
+  .donut{width:128px;height:128px;border-radius:50%;position:relative;flex:none}
+  .donut-hole{position:absolute;inset:25px;background:var(--card);border-radius:50%}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .donut-center b{font-size:22px;letter-spacing:-.5px}
+  .donut-center span{font-size:9.5px;color:var(--mute)}
+  .donut-legend{display:flex;flex-direction:column;gap:7px;font-size:10.5px;color:#5f6b7a;flex:1}
+  .donut-legend .row{display:flex;align-items:center;gap:6px}
+  .donut-legend i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+  .donut-legend .n{margin-left:auto;color:#9aa1ad}
+  .timeline{display:flex;position:relative;margin-top:18px}
+  .timeline:before{content:"";position:absolute;left:10%;right:10%;top:27px;height:2px;background:#e8edf5}
+  .timeline-item{position:relative;z-index:1;flex:1;text-align:center}
+  .timeline-month{font-size:10.5px;color:var(--mute);margin-bottom:5px}
+  .timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--blue);margin:0 auto;border:2px solid var(--card);box-shadow:0 0 0 1px #c9d8f8}
+  .timeline-label{font-size:11px;color:#373c43;margin-top:5px;font-weight:500}
+  .timeline-edit{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+  .timeline-edit-row{display:grid;grid-template-columns:132px 1fr;gap:8px}
+  .method{display:inline-block;font-size:10px;border-radius:5px;padding:2px 6px;font-weight:500}
+  .method.college{background:#e8f0ff;color:#2b5cd9}
+  .method.self{background:#fdf1df;color:#b4690e}
+  .challenge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .report-layout{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;align-items:start}
+  .report-full{min-height:560px}
+  .report-body{font-size:13px;line-height:1.9;color:#373c43}
+  .report-section{margin-bottom:16px}
+  .report-section h4{font-size:12px;font-weight:700;margin-bottom:5px;color:#1f2329}
+  .report-section p{color:#373c43}
+  .report-foot{margin-top:18px;border-top:1px solid #eef1f6;padding-top:10px;font-size:10.5px;color:#9aa1ad}
+  .ai-badge{font-size:10px;color:#2b5cd9;background:#e8f0ff;border-radius:99px;padding:3px 8px;font-weight:600}
+  .summary-text{font-size:13px;line-height:1.9;color:#2c3138;background:#f8faff;border:1px solid #e2ebff;border-radius:10px;padding:12px}
+  .summary-skeleton{padding:6px 0 2px}
+  .sk-line{height:11px;border-radius:6px;margin:8px 0;background:linear-gradient(90deg,#eef2f8 25%,#f8fafd 37%,#eef2f8 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
+  .sk-line:nth-child(2){width:94%}.sk-line:nth-child(3){width:86%}.sk-line:nth-child(4){width:62%}
+  .sk-note{font-size:11px;color:#9aa1ad;margin-top:10px}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+  .summary-error{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fbeceb;border:1px solid #f0d3d0;border-radius:10px;padding:12px;font-size:12px;color:#b3261e}
+  .col{display:flex;flex-direction:column;gap:12px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .card-title{font-size:13px;font-weight:700}
+  .card-sub{font-size:10.5px;color:#9aa1ad;margin-top:2px}
+  .mini-tabs{display:flex;background:#f2f4f8;border-radius:8px;padding:2px}
+  .mini-tabs span{font-size:10.5px;color:#8f959e;padding:3px 8px;border-radius:6px;cursor:pointer}
+  .mini-tabs span.on{background:#fff;color:#373c43;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+  .q-row{display:flex;align-items:center;gap:10px;padding:7px 0}
+  .q-row .text{flex:1;font-size:12px;color:#373c43;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .q-row .num{width:30px;text-align:right;font-size:11.5px;color:var(--mute);flex:none}
+  .track{display:inline-block;width:96px;height:5px;border-radius:5px;background:#f0f3f8;flex:none;overflow:hidden;vertical-align:middle}
+  .fill{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#8db3ff,#3b73f5)}
+  .gap-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f2f4f7}
+  .gap-row:last-child{border-bottom:0}
+  .gap-row .text{flex:1;font-size:12px;color:#373c43;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gap-row .count{font-size:10.5px;color:#b4690e;background:#fdf1df;border-radius:5px;padding:2px 6px;font-weight:600}
+  .gap-row .tag{font-size:10px;color:var(--mute);background:#f4f6fa;border-radius:5px;padding:2px 5px}
+  .sug{display:flex;gap:9px;padding:8px 0;font-size:11.5px;line-height:1.6;color:#4f5b6b}
+  .sug .idx{width:17px;height:17px;border-radius:50%;background:#e8f0ff;color:#2b5cd9;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .chart-labels{display:flex;justify-content:space-between;font-size:9.5px;color:#aab1bd;margin-top:4px}
+  .foot-note{font-size:10px;color:#aab1bd;margin-top:12px}
+  .tagline{font-size:12px;color:#5b7bb5;letter-spacing:.2px;margin-bottom:10px}
+  .spark{display:inline-block;width:28px;height:28px;margin-left:6px;vertical-align:5px;color:var(--warm)}
+  .spark svg{display:block;width:100%;height:100%}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .chip{border:1px solid #e6eaf2;background:#fff;border-radius:10px;padding:7px 12px;font-size:12px;color:#4f5b6b;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .chip:hover{border-color:#cddcff;background:#f8faff}
+  .chip svg{width:12px;height:12px}
+  .chat-wrap{max-width:780px}
+  .chat-main{display:flex;flex-direction:column;justify-content:center}
+  .chat-hero{width:100%;max-width:920px;margin:0 auto}
+  .chat-hero h1{font-size:44px;line-height:1.14;letter-spacing:-1.6px}
+  .chat-hero h1 .l2{display:block}
+  .seg{display:inline-flex;background:#f1f3f8;border-radius:14px;padding:4px;margin-top:22px}
+  .seg-item{padding:8px 15px;border-radius:10px;font-size:12.5px;color:#6b7280;cursor:pointer}
+  .seg-item.active{background:#1b1b1b;color:#fff;font-weight:600}
+  .input-card{margin-top:16px;background:#fff;border:1px solid #e6ecf7;border-radius:18px;
+    box-shadow:0 0 0 4px rgba(59,115,245,.05),0 16px 38px rgba(59,115,245,.09);padding:18px 20px 13px}
+  .chat-input{width:100%;border:0;outline:0;font-size:14.5px;color:#454a52;background:transparent;line-height:1.6;min-height:48px;resize:none}
+  .chat-input::placeholder{color:#98a1af}
+  .input-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+  .bar-left,.bar-right{display:flex;align-items:center;gap:9px}
+  .round-btn{width:28px;height:28px;border-radius:50%;border:1px solid #dfe6f2;background:#f8f9fb;color:#7b879b;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .pill-btn{display:flex;align-items:center;gap:6px;border:1px solid #e6eaf2;background:#f8fafd;border-radius:9px;padding:6px 9px;font-size:11.5px;color:#5f6b7a;cursor:pointer}
+  .pill-btn svg{width:12px;height:12px}
+  .model-pill{display:flex;align-items:center;gap:6px;background:#f4f6fa;border:1px solid #e5e9f2;border-radius:20px;padding:5px 9px;font-size:11.5px;color:#2b2f36;cursor:pointer}
+  .check{display:flex;align-items:center;gap:6px;font-size:12px;color:#5f6b7a}
+  .check input{accent-color:var(--blue)}
+  .check svg{width:9px;height:9px}
+  .send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 16px rgba(59,115,245,.28)}
+  .send svg{width:15px;height:15px}
+  .hint-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px}
+  .hint{display:flex;gap:14px;color:#9aa3b2;font-size:11.5px;flex-wrap:wrap}
+  .hint span{display:flex;align-items:center;gap:5px}
+  .hint svg{width:10px;height:10px;color:#92a6cc}
+  .history-btn{display:flex;align-items:center;gap:6px;border:1px solid #dbe7ff;background:var(--soft);border-radius:9px;padding:7px 11px;font-size:11.5px;color:#2f6fed;cursor:pointer}
+  .history-btn svg{width:13px;height:13px;color:var(--blue)}
+  .history-wrap{position:relative}
+  .popover{position:absolute;right:0;top:calc(100% + 9px);width:360px;background:#fff;border:1px solid #e6ecf7;border-radius:14px;box-shadow:0 16px 44px rgba(31,74,158,.13);padding:7px;z-index:20}
+  .popover:before{content:"";position:absolute;right:24px;top:-6px;width:10px;height:10px;background:#fff;border-left:1px solid #e6ecf7;border-top:1px solid #e6ecf7;transform:rotate(45deg)}
+  .pop-head{display:flex;align-items:center;justify-content:space-between;padding:6px 9px 4px;font-size:11.5px;font-weight:700}
+  .pop-head span{font-weight:400;color:#b0b0b0;font-size:10px}
+  .pop-item{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;font-size:11.5px;color:#5f5f5f;cursor:pointer}
+  .pop-item:hover{background:#f7f9fd}
+  .pop-item .q{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pop-item .t{font-size:10px;color:#b0b0b0;flex:none}
+  .pop-foot{border-top:1px solid #f0f2f7;margin-top:5px;padding:8px;font-size:10.5px;color:#7f8ca3;text-align:center;cursor:pointer}
+  .answer-card{margin-top:22px;background:#fff;border:1px solid #dce6f7;border-radius:16px;padding:18px 20px;box-shadow:0 10px 30px rgba(59,115,245,.09)}
+  .answer-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eef0f4;padding-bottom:10px;margin-bottom:12px}
+  .answer-badge{font-size:10.5px;color:#2b5cd9;background:#e8f0ff;border-radius:99px;padding:3px 8px;font-weight:600}
+  .answer-body{font-size:13px;line-height:1.85;color:#2c3138}
+  .answer-body ul{padding-left:18px;margin-top:6px}
+  .answer-body li{margin-bottom:4px}
+  .cite{font-size:10px;color:#2b5cd9;font-weight:700}
+  .source-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .source-card{padding:9px 10px;border:1px solid #e2e8f5;border-radius:10px;background:#f8faff;font-size:11px;cursor:pointer}
+  .source-card b{color:#2454c7}
+  .source-card span{display:block;color:#9aa1ad;font-size:10px;margin-top:2px}
+  .form-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid .full{grid-column:1/-1}
+  .field-label{display:block;font-size:11px;color:#6f757f;margin:0 0 6px}
+  .field,.select,.textarea{width:100%;border:1px solid #e4e9f2;border-radius:9px;padding:9px 11px;font-size:12.5px;color:#14161a;background:#fcfdff;outline:none}
+  .field:focus,.select:focus,.textarea:focus{border-color:#9db8ff;box-shadow:0 0 0 3px rgba(59,115,245,.10)}
+  .textarea{min-height:88px;resize:vertical;line-height:1.6}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+  .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .upload-box{display:flex;align-items:center;gap:10px;border:1px dashed #d8e1f0;background:#fafbff;border-radius:10px;padding:11px 12px;cursor:pointer;min-height:62px}
+  .upload-box:hover{border-color:#9db8ff;background:#f7faff}
+  .upload-icon{width:30px;height:30px;border-radius:8px;background:#eef4ff;color:#2f6fed;display:flex;align-items:center;justify-content:center;flex:none}
+  .upload-icon svg{width:15px;height:15px}
+  .upload-title{display:block;font-size:12px;font-weight:600;color:#373c43}
+  .upload-hint{display:block;font-size:10px;color:#9aa1ad;margin-top:3px}
+  .file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .file-chip{display:inline-flex;align-items:center;gap:6px;background:#f4f7fb;border:1px solid #e6ebf3;border-radius:7px;padding:4px 7px;font-size:10.5px;color:#5f6b7a}
+  .file-chip .kind{font-size:9px;color:#2f6fed;background:#e8f0ff;border-radius:4px;padding:1px 4px}
+  .file-chip button{border:0;background:transparent;color:#9aa1ad;cursor:pointer;font-size:13px;line-height:1}
+  .start-icon{width:54px;height:54px;border-radius:16px;background:#eef4ff;color:#2f6fed;display:flex;align-items:center;justify-content:center;margin:0 auto}
+  .start-icon svg{width:26px;height:26px}
+  .start-edit{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .rich-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border:1px solid #e4e9f2;border-bottom:0;border-radius:9px 9px 0 0;background:#f8fafd;padding:6px}
+  .rich-toolbar button{border:0;background:transparent;border-radius:6px;padding:4px 7px;font-size:11px;color:#5f6b7a;cursor:pointer}
+  .rich-toolbar button:hover{background:#eef3fb;color:#2f6fed}
+  .rich-editor{min-height:150px;border:1px solid #e4e9f2;border-radius:0 0 9px 9px;padding:10px 12px;font-size:12.5px;line-height:1.8;outline:none;background:#fcfdff}
+  .rich-editor:empty:before{content:attr(data-placeholder);color:#aab2bf}
+  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .profile-row{font-size:12px;color:#5f6b7a;padding:7px 0;border-bottom:1px solid #f2f4f7}
+  .profile-row:last-child{border-bottom:0}
+  .profile-row b{display:inline-block;width:86px;color:#8f959e;font-weight:500}
+  .feedback-scores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+  .feedback-score{background:#f7f9fc;border:1px solid #e8eef7;border-radius:8px;padding:8px 10px;font-size:11.5px;color:#5f6b7a}
+  .feedback-score b{float:right;color:#2b5cd9}
+  .report-eval-form .form-grid>div:nth-child(2){grid-column:1/-1}
+  .report-eval-form .form-grid{grid-template-columns:1fr}
+  .table{width:100%;border-collapse:collapse;font-size:12px}
+  .table th{text-align:left;font-weight:600;color:#8f959e;font-size:10.5px;padding:8px 8px;border-bottom:1px solid #eef1f6}
+  .table td{padding:9px 8px;border-bottom:1px solid #f2f4f7;color:#373c43}
+  .table tr:last-child td{border-bottom:0}
+  .status{display:inline-flex;align-items:center;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:600}
+  .status.ok{color:#1f7a52;background:#eaf7f1}
+  .status.pending{color:#b4690e;background:#fdf1df}
+  .status.gray{color:#6f757f;background:#f1f3f6}
+  .status.rejected{color:#b3261e;background:#fbeceb}
+  .level{display:inline-flex;align-items:center;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:600}
+  .level.special{color:#b4690e;background:#fde2b8}
+  .level.excellent{color:#2b5cd9;background:#e8f0ff}
+  .level.pass{color:#5f6b7a;background:#f1f3f6}
+  .tabs{display:flex;gap:4px;background:#f2f4f8;border-radius:10px;padding:3px;width:max-content}
+  .tab{border:0;background:transparent;border-radius:8px;padding:6px 11px;font-size:11.5px;color:#6b7280;cursor:pointer}
+  .tab.active{background:#fff;color:#1b1b1b;font-weight:600;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+  .progress{height:7px;border-radius:6px;background:#f0f3f8;overflow:hidden}
+  .progress>span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8db3ff,#3b73f5)}
+  .job-card{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .challenge-job-card{cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s}
+  .challenge-job-card:hover{border-color:#b8c9e7;box-shadow:0 8px 22px rgba(37,64,105,.08);transform:translateY(-1px)}
+  .challenge-job-card:focus-visible{outline:2px solid #7da4f5;outline-offset:2px}
+  .job-detail-section h4{font-size:12px;color:#273545;margin:0 0 8px}
+  .job-detail-section ol{margin:0;padding-left:20px}
+  .job-detail-section li{font-size:11.5px;line-height:1.8;color:#445061;margin-bottom:5px}
+  .job-card h3{font-size:14px}
+  .job-meta{font-size:11px;color:#8f959e;line-height:1.6}
+  .job-tags{display:flex;gap:5px;flex-wrap:wrap}
+  .job-tag{font-size:10px;color:#5f6b7a;background:#f4f6fa;border-radius:5px;padding:2px 6px}
+  .job-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;border-top:1px solid #f2f4f7}
+  .points{font-size:11px;color:#b4690e;font-weight:600}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.25);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:50}
+  .modal{width:480px;max-width:calc(100vw - 40px);background:#fff;border-radius:18px;border:1px solid #e6ecf7;box-shadow:0 24px 70px rgba(15,23,42,.18);padding:20px}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .modal-head h3{font-size:15px}
+  .modal-close{border:0;background:#f3f5f9;border-radius:50%;width:26px;height:26px;cursor:pointer;color:#777}
+  .toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-10px);background:rgba(28,29,33,.92);color:#fff;font-size:12px;padding:8px 14px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.16);opacity:0;pointer-events:none;transition:.2s;z-index:80}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .notice{background:#f8faff;border:1px solid #e2ebff;color:#4f6b9e;border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.7}
+  .empty{color:#aab1bd;font-size:12px;padding:18px 0;text-align:center}
+
+  /* 登录页 */
+  .login-page{display:flex;height:100vh;background:radial-gradient(1000px 620px at 18% -10%,#eaf2ff 0%,rgba(234,242,255,0) 62%),radial-gradient(900px 600px at 88% 108%,#f0f5ff 0%,rgba(240,245,255,0) 60%),#fbfcfe}
+  .login-brand{width:46%;padding:44px 56px 40px;display:flex;flex-direction:column}
+  .login-copy{margin:auto 0;max-width:520px}
+  .login-copy .eyebrow{font-size:12px;color:#5b7bb5;margin-bottom:14px}
+  .login-copy h1{font-size:56px;line-height:1.14;font-weight:800;letter-spacing:-2px}
+  .login-copy h1 .l2{display:block;white-space:nowrap}
+  .login-copy .desc{font-size:15px;line-height:1.9;color:#6f7a8b;margin-top:18px;max-width:430px}
+  .login-features{display:flex;gap:8px;margin-top:22px}
+  .login-feature{background:#fff;border:1px solid #e6ebf5;border-radius:20px;padding:7px 12px;font-size:12px;color:#5f6b7a;display:flex;align-items:center;gap:6px}
+  .login-feature i{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+  .login-foot{font-size:11px;color:#a6aeba}
+  .login-brand .ver{margin-left:0}
+  .login-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 60px}
+  .login-card{width:400px;background:#fff;border:1px solid #e6ecf7;border-radius:24px;box-shadow:0 0 0 4px rgba(59,115,245,.04),0 24px 70px rgba(59,115,245,.10);padding:32px}
+  .login-card h2{font-size:24px;font-weight:800;letter-spacing:-.5px}
+  .login-card .lead{font-size:13px;color:var(--mute);margin-top:7px}
+  .roles{display:flex;background:#f1f3f8;border-radius:14px;padding:4px;margin:20px 0}
+  .roles button{flex:1;border:0;background:transparent;border-radius:10px;padding:9px 0;font-size:13px;color:#6b7280;cursor:pointer}
+  .roles button.active{background:#1b1b1b;color:#fff;font-weight:600}
+  .login-row{display:flex;align-items:center;justify-content:space-between;margin:12px 0 16px;font-size:12px;color:#7c8491}
+  .login-row label{display:flex;align-items:center;gap:6px}
+  .login-row a{color:#2f6fed;text-decoration:none}
+  .login-primary{width:100%;height:44px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 8px 20px rgba(59,115,245,.28)}
+  .split{display:flex;align-items:center;gap:12px;margin:16px 0;color:#b0b6c0;font-size:11px}
+  .split:before,.split:after{content:"";flex:1;height:1px;background:#eef1f6}
+  .ghost{width:100%;height:42px;border:1px solid #e4e9f2;border-radius:12px;background:#fff;color:#4f5b6b;font-size:13px;cursor:pointer}
+  .login-note{text-align:center;font-size:11px;color:#aab2bf;margin-top:12px}
+  .hidden{display:none!important}
+  .side-foot{position:relative}
+  .foot-icon{margin-left:auto;color:#9aa3b2;border:0;background:transparent;padding:4px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .foot-icon:hover{background:#eef0f4}
+  .foot-icon svg{width:15px;height:15px}
+  .settings-pop{position:absolute;right:8px;bottom:calc(100% + 8px);width:180px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.14);padding:6px;z-index:30}
+  .set-item{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:8px;font-size:12px;color:#4f5b6b;cursor:pointer}
+  .set-item:hover{background:#f5f7fb}
+  .set-item .set-ico{width:14px;height:14px;color:#7b879b;display:flex;align-items:center}
+  .set-item em{margin-left:auto;font-style:normal;font-size:10px;color:#9aa1ad}
+  .set-item.danger{color:#b3261e}
+  .set-item.danger .set-ico{color:#b3261e}
+
+  /* 深色外观 */
+  html[data-theme="dark"]{--ink:#e6ebf3;--sub:#a7b0bf;--mute:#7f8896;--line:#252d39;--side:#151a22;--bg:#0f131a;--card:#171d27;--soft:#1c2534;--blue:#5b8ff5;--blue2:#3b73f5}
+  html[data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+  html[data-theme="dark"] .side{background:var(--side)}
+  html[data-theme="dark"] .ver{background:#1d2430;border-color:#2b3442;color:#8f98a6}
+  html[data-theme="dark"] .nav-item{color:#c7ced9}
+  html[data-theme="dark"] .nav-item:hover{background:#1d2430}
+  html[data-theme="dark"] .nav-item.active{background:linear-gradient(90deg,#1b2a44,#1a2230);color:#e8eef8}
+  html[data-theme="dark"] .nav-item svg{color:#8f9aac}
+  html[data-theme="dark"] .nav-item.active svg{color:#7ea6ff}
+  html[data-theme="dark"] .divider,html[data-theme="dark"] .side-foot{border-color:#252d39}
+  html[data-theme="dark"] .side-card,html[data-theme="dark"] .announce,html[data-theme="dark"] .card,html[data-theme="dark"] .kpi,html[data-theme="dark"] .form-card,html[data-theme="dark"] .login-card,html[data-theme="dark"] .input-card,html[data-theme="dark"] .answer-card,html[data-theme="dark"] .popover,html[data-theme="dark"] .modal,html[data-theme="dark"] .btn,html[data-theme="dark"] .chip,html[data-theme="dark"] .login-feature,html[data-theme="dark"] .ghost,html[data-theme="dark"] .settings-pop{background:var(--card);border-color:var(--line)}
+  html[data-theme="dark"] h1,html[data-theme="dark"] .card-title,html[data-theme="dark"] .kpi .n,html[data-theme="dark"] .brandname,html[data-theme="dark"] .job-card h3,html[data-theme="dark"] .table td,html[data-theme="dark"] .answer-body,html[data-theme="dark"] .q-row .text,html[data-theme="dark"] .gap-row .text,html[data-theme="dark"] .side-card .big,html[data-theme="dark"] .login-copy h1,html[data-theme="dark"] .login-card h2{color:var(--ink)}
+  html[data-theme="dark"] .sub,html[data-theme="dark"] .crumb,html[data-theme="dark"] .card-sub,html[data-theme="dark"] .side-list-row,html[data-theme="dark"] .trend-row,html[data-theme="dark"] .table th,html[data-theme="dark"] .job-meta,html[data-theme="dark"] .foot-note,html[data-theme="dark"] .chart-labels,html[data-theme="dark"] .kpi .k,html[data-theme="dark"] .hint,html[data-theme="dark"] .login-copy .desc,html[data-theme="dark"] .login-copy .eyebrow,html[data-theme="dark"] .login-card .lead,html[data-theme="dark"] .login-row,html[data-theme="dark"] .login-note,html[data-theme="dark"] .login-foot{color:#9aa4b4}
+  html[data-theme="dark"] .field,html[data-theme="dark"] .select,html[data-theme="dark"] .textarea,html[data-theme="dark"] .chat-input{background:#11161e;border-color:#2a3341;color:var(--ink)}
+  html[data-theme="dark"] .field::placeholder,html[data-theme="dark"] .chat-input::placeholder{color:#6f7887}
+  html[data-theme="dark"] .round-btn{background:#1d2430;border-color:#2a3341;color:#a8b2c1}
+  html[data-theme="dark"] .btn,html[data-theme="dark"] .chip{color:#c7ced9}
+  html[data-theme="dark"] .btn:hover,html[data-theme="dark"] .pop-item:hover,html[data-theme="dark"] .set-item:hover{background:#1d2430}
+  html[data-theme="dark"] .seg,html[data-theme="dark"] .roles{background:#1b2230}
+  html[data-theme="dark"] .seg-item,html[data-theme="dark"] .roles button{color:#9aa4b4}
+  html[data-theme="dark"] .seg-item.active,html[data-theme="dark"] .roles button.active{background:#e8edf5;color:#12161d}
+  html[data-theme="dark"] .popover:before{background:var(--card);border-color:#252d39}
+  html[data-theme="dark"] .pop-item,html[data-theme="dark"] .pop-head,html[data-theme="dark"] .set-item{color:#c7ced9}
+  html[data-theme="dark"] .table th,html[data-theme="dark"] .table td{border-color:#232b37}
+  html[data-theme="dark"] .notice{background:#17202d;border-color:#283447;color:#9db6e6}
+  html[data-theme="dark"] .student-ledger-toolbar,html[data-theme="dark"] .student-filter-panel{background:#131a24;border-color:#283447}
+  html[data-theme="dark"] .student-filter-foot{border-color:#283447}
+  html[data-theme="dark"] .import-file-box{background:#131a24;border-color:#2b3b54}
+  html[data-theme="dark"] .import-preview{border-color:#283447}
+  html[data-theme="dark"] .import-preview .table th{background:var(--card)}
+  html[data-theme="dark"] .status.gray{background:#232b37;color:#a8b2c1}
+  html[data-theme="dark"] .status.pending{background:#3a2b17;color:#f0b65c}
+  html[data-theme="dark"] .status.ok{background:#173226;color:#6fd2a3}
+  html[data-theme="dark"] .status.rejected{background:#3a1f1d;color:#ef9a93}
+  html[data-theme="dark"] .level.special{background:#3a2b17;color:#f0b65c}
+  html[data-theme="dark"] .level.excellent{background:#1b2a44;color:#8db3ff}
+  html[data-theme="dark"] .level.pass{background:#232b37;color:#a8b2c1}
+  html[data-theme="dark"] .source-card{background:#131b26;border-color:#283447}
+  html[data-theme="dark"] .source-card b{color:#8db3ff}
+  html[data-theme="dark"] .job-tag{background:#1d2430;color:#a8b2c1}
+  html[data-theme="dark"] .track{background:#232c3a}
+  html[data-theme="dark"] .report-body,html[data-theme="dark"] .report-section p,html[data-theme="dark"] .report-section h4,html[data-theme="dark"] .summary-text{color:var(--ink)}
+  html[data-theme="dark"] .summary-text{background:#131b26;border-color:#283447}
+  html[data-theme="dark"] .sk-line{background:linear-gradient(90deg,#222b38 25%,#2c3646 37%,#222b38 63%);background-size:400% 100%}
+  html[data-theme="dark"] .sk-note{color:#8f98a6}
+  html[data-theme="dark"] .report-foot{color:#9aa4b4}
+  html[data-theme="dark"] .summary-error{background:#3a1f1d;border-color:#5a2e2a;color:#ef9a93}
+  html[data-theme="dark"] .ai-badge{background:#1b2a44;color:#8db3ff}
+  html[data-theme="dark"] .progress-stack{background:#232b37}
+  html[data-theme="dark"] .legend{color:#9aa4b4}
+  html[data-theme="dark"] .deadline{background:#2b2418;border-color:#4a3a1f;color:#e0b56b}
+  html[data-theme="dark"] .risk-row{color:var(--ink);border-color:#232b37}
+  html[data-theme="dark"] .timeline:before{background:#2a3341}
+  html[data-theme="dark"] .timeline-label{color:var(--ink)}
+  html[data-theme="dark"] .donut-legend{color:#a8b2c1}
+  html[data-theme="dark"] .method.college{background:#1b2a44;color:#8db3ff}
+  html[data-theme="dark"] .method.self{background:#3a2b17;color:#f0b65c}
+  html[data-theme="dark"] input[type="date"]{color-scheme:dark}
+  html[data-theme="dark"] .upload-box{background:#131b26;border-color:#2a3341}
+  html[data-theme="dark"] .upload-title{color:var(--ink)}
+  html[data-theme="dark"] .file-chip{background:#1d2430;border-color:#2a3341;color:#c7ced9}
+  html[data-theme="dark"] .file-chip .kind{background:#1b2a44;color:#8db3ff}
+  html[data-theme="dark"] .rich-toolbar{background:#1d2430;border-color:#2a3341}
+  html[data-theme="dark"] .rich-toolbar button{color:#c7ced9}
+  html[data-theme="dark"] .rich-editor{background:#11161e;border-color:#2a3341;color:var(--ink)}
+  html[data-theme="dark"] .profile-row{color:#c7ced9;border-color:#232b37}
+  html[data-theme="dark"] .profile-row b{color:#8f98a6}
+  html[data-theme="dark"] .feedback-score{background:#131b26;border-color:#283447;color:#a8b2c1}
+  html[data-theme="dark"] .login-page{background:radial-gradient(1000px 620px at 18% -10%,#16233a 0%,rgba(22,35,58,0) 62%),radial-gradient(900px 600px at 88% 108%,#141d2c 0%,rgba(20,29,44,0) 60%),#0f131a}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+  const ICONS = {
+    chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/></svg>',
+    doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4"/></svg>',
+    clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
+    flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 21V4"/><path d="M6 4h11l-2.5 4L17 12H6"/></svg>',
+    grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+    users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 5h5M16 9h4M16 13h5"/></svg>',
+    briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5h8v2M3 12h18"/></svg>',
+    star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3z"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+    download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>',
+    gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>',
+    sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    logout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H4V3h5M14 16l5-4-5-4M19 12H9"/></svg>',
+    send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+    mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    search:'<svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+    chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>',
+    spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5l2.4 7.1 7.1 2.4-7.1 2.4L12 20.5l-2.4-7.1L2.5 11l7.1-2.4L12 1.5z"/></svg>'
+  };
+
+  const DATA = {
+    history:[
+      ['汉阳区融媒体中心实习都做什么？','5 分钟前'],
+      ['南方周末实习生有什么要求','昨天'],
+      ['最近有哪些实习岗位？','2 天前'],
+      ['实习周报怎么写','3 天前'],
+      ['融媒体中心实习能学到什么','上周']
+    ],
+    studentHistory:[
+      {week:'第 6 周',status:'待评价'},
+      {week:'第 5 周',status:'已评价',level:'特别优秀',score:8.4,tags:['创新报告','被摘录报告'],comment:'本周产出清晰，采访与剪辑流程完成度较高。建议下周加强现场同期声收音，并主动承担一条独立选题。'},
+      {week:'第 4 周',status:'已评价',level:'优秀',score:7.25,tags:['创新报告'],comment:'完成度较好，选题和排版有进步；建议补充量化产出。'},
+      {week:'第 3 周',status:'已评价',level:'合格',score:6,tags:[],comment:'按计划完成本周任务，继续保持记录习惯。'},
+      {week:'第 2 周',status:'已评价',level:'优秀',score:7,tags:[],comment:'工作记录清楚，能主动配合团队完成任务。'},
+      {week:'第 1 周',status:'已评价',level:'合格',score:6,tags:[],comment:'完成基础任务，建议下周增加现场采访记录。'}
+    ],
+    sources:[
+      ['辑光计划 · 第二周周报','2025-07-12'],
+      ['汉阳区融媒体中心第一周周报','2026-07-15']
+    ],
+    jobs:[
+      ['新华社新媒体','新媒体编辑','北京','新闻传播优先 · 3 个月 · 每周 5 天','120'],
+      ['南方周末','社会新闻部实习生','广州/线上','实习 3 个月以上 · 每周到岗 2–3 天','100'],
+      ['汉阳区融媒体中心','采编拍摄实习生','武汉','熟悉秀米/PR/剪映 · 提供实习证明','80']
+    ],
+    challengeJobs:[
+      {company:'新华社新媒体',role:'新媒体编辑',city:'北京',quota:3,status:'在招',applicants:[
+        ['李明','网传 2023','10-28 14:20','待处理'],
+        ['张琪','新闻 2023','10-27 10:05','待处理'],
+        ['王雨','网传 2022','10-26 16:40','已通过'],
+        ['刘洋','广电 2022','10-25 09:30','待处理'],
+        ['周宁','网传 2022','10-24 19:12','待处理'],
+        ['赵磊','新闻 2022','10-24 11:08','待处理'],
+        ['陈静','网传 2023','10-23 15:20','待处理'],
+        ['孙悦','广电 2023','10-22 10:00','待处理']
+      ]},
+      {company:'南方周末',role:'社会新闻部实习生',city:'广州/线上',quota:2,status:'在招',applicants:[
+        ['王雨','网传 2022','10-27 09:40','待处理'],
+        ['刘洋','广电 2022','10-26 14:10','已通过'],
+        ['周宁','网传 2022','10-25 18:20','待处理'],
+        ['陈静','网传 2023','10-24 11:05','待处理'],
+        ['赵磊','新闻 2022','10-23 16:30','待处理']
+      ]},
+      {company:'汉阳区融媒体中心',role:'采编拍摄实习生',city:'武汉',quota:4,status:'在招',applicants:[
+        ['李明','网传 2023','10-28 10:10','待处理'],
+        ['张琪','新闻 2023','10-27 15:35','待处理'],
+        ['孙悦','广电 2023','10-26 09:20','待处理'],
+        ['陈静','网传 2023','10-25 17:45','已通过'],
+        ['周宁','网传 2022','10-24 13:10','待处理'],
+        ['王雨','网传 2022','10-23 10:30','待处理']
+      ]}
+    ],
+    students:[
+      ['李明','网传 2023','汉阳区融媒体中心','审核中','—','2023001001'],
+      ['王雨','网传 2022','南方周末','已通过','陈老师','2022001002'],
+      ['张琪','新闻 2023','新华社新媒体','审核中','—','2023001003'],
+      ['刘洋','广电 2022','凤凰网','已通过','周老师','2022001004'],
+      ['陈静','网传 2023','人民日报','待提交','—','2023001005'],
+      ['赵磊','新闻 2022','北京青年报','已通过','李老师','2022001006'],
+      ['周宁','网传 2022','网易传媒','审核中','—','2022001007'],
+      ['孙悦','广电 2023','汉阳区融媒体中心','待提交','—','2023001008']
+    ],
+    reports:[
+      {student:'李明',week:'第 6 周',unit:'汉阳区融媒体中心',status:'待评价',content:'本周参与「汉阳知音」公众号推文排版 3 篇，跟随老师前往江滩拍摄秋季文旅短视频素材，完成 1 条 45 秒竖屏视频粗剪。',reflect:'第一次独立完成短视频粗剪，意识到素材分类和字幕校对会直接影响出片效率；也进一步理解了公众号推文的选题和排版规范。',plan:'下周重点提升现场同期声收音质量，争取独立完成一条个人署名短视频，并继续跟进文旅选题。',summary:'李明本周在汉阳区融媒体中心完成公众号推文排版 3 篇，参与江滩秋季文旅短视频素材拍摄，并独立完成 1 条 45 秒竖屏视频粗剪。工作中进一步熟悉了选题、采拍与剪辑流程，也意识到三审三校和素材规范的重要性。下周计划提升同期声收音质量，争取完成第一条个人署名短视频。'},
+      {student:'王雨',week:'第 6 周',unit:'南方周末',status:'待评价',content:'参与社会新闻部选题会，整理 2 条本地民生线索；跟随记者完成一次社区采访，协助事实核查。'},
+      {student:'刘洋',week:'第 5 周',unit:'凤凰网',status:'已评价',score:6,content:'参与营销策略项目竞品分析，完成 1 份市场调研摘要。'},
+      {student:'赵磊',week:'第 5 周',unit:'北京青年报',status:'已评价',score:7,content:'完成青年新闻选题 2 个，参与短视频拍摄与剪辑。'}
+    ],
+    enterpriseJobs:[
+      ['新媒体编辑','北京','3 个月 · 每周 5 天','3','在招'],
+      ['短视频运营','广州','4 个月 · 每周 4 天','2','在招'],
+      ['内容运营实习生','武汉','3 个月 · 每周 3 天','4','已结束']
+    ],
+    interns:[
+      ['李明','汉阳区融媒体中心','待评分'],
+      ['王雨','南方周末','待评分'],
+      ['刘洋','凤凰网','已评分'],
+      ['赵磊','北京青年报','已评分']
+    ],
+    applications:[
+      ['李明','新媒体编辑','10-28 14:20','待处理'],
+      ['张琪','短视频运营','10-27 10:05','待处理'],
+      ['王雨','内容运营实习生','10-26 16:40','已通过'],
+      ['陈静','新媒体编辑','10-25 09:30','已拒绝'],
+      ['周宁','短视频运营','10-24 19:12','待处理']
+    ]
+  };
+
+  const CHALLENGE_JOB_DETAILS = [
+    {
+      summary:'参与新华社新媒体平台的内容策划、编辑与发布，在真实新闻生产流程中完成选题、采编和传播效果复盘。',
+      responsibilities:[
+        '参与新媒体选题策划、资料收集和稿件编辑，协助完成重点报道与日常栏目内容。',
+        '负责客户端、公众号等平台的内容排版、校对和发布，确保信息准确、表达清晰。',
+        '跟踪内容数据和用户反馈，参与复盘并提出标题、结构和传播方式的改进建议。',
+        '配合采编、视觉和视频团队完成跨部门协作，按时推进项目任务。'
+      ],
+      requirements:[
+        '新闻传播、中文、社会学等相关专业优先，具备扎实的文字功底和新闻敏感度。',
+        '熟悉微信公众号、客户端或社交平台内容生产流程，有校园媒体经验者优先。',
+        '工作细致负责，能够适应新闻选题的时效要求，具备良好的沟通协作能力。',
+        '实习期不少于 3 个月，每周可线下到岗 5 天；提交简历时可附代表作品。'
+      ]
+    },
+    {
+      summary:'参与社会新闻选题、采访和事实核查，在记者带领下完成从线索发现到内容发布的完整实践。',
+      responsibilities:[
+        '协助搜集社会新闻线索，整理公开信息、采访素材和背景资料。',
+        '跟随记者完成社区、机构和人物采访，记录现场信息并协助事实核查。',
+        '参与选题会，协助完成图文稿件、短视频素材和发布内容的基础整理。',
+        '对采访对象信息和未刊发材料严格保密，遵守新闻伦理与机构规范。'
+      ],
+      requirements:[
+        '新闻传播、社会学、法学等相关专业优先，关注公共议题和深度报道。',
+        '具备基本采访能力、信息检索能力和文字表达能力，愿意主动沟通。',
+        '每周到岗 2-3 天，实习期 3 个月以上，可线上协作，能接受临时采访任务。',
+        '有校园媒体、社会调查或新闻作品者优先；提交简历时请附作品集。'
+      ]
+    },
+    {
+      summary:'参与区级融媒体中心的新媒体采编、活动拍摄与短视频制作，覆盖选题、采拍、剪辑和发布全流程。',
+      responsibilities:[
+        '参与「汉阳知音」等新媒体账号的选题、采写、排版和发布工作。',
+        '跟随老师参加活动与现场报道，完成照片、视频素材拍摄和基础整理。',
+        '使用 PR、剪映等工具完成短视频粗剪，协助字幕、封面和发布物料制作。',
+        '维护媒资库并参与内容复盘，保证素材归档规范、项目按计划推进。'
+      ],
+      requirements:[
+        '新闻传播、广播电视、网络与新媒体等相关专业优先。',
+        '熟悉秀米、PR、剪映等至少一种内容生产工具，有短视频作品者优先。',
+        '具备现场沟通和团队协作能力，能够适应外出拍摄和活动排期。',
+        '实习期约 3 个月，每周到岗 5 天，可提供实习证明；申请时提交简历与作品集。'
+      ]
+    }
+  ];
+
+  let savedTheme='light';
+  try{savedTheme=localStorage.getItem('app-theme')||'light'}catch{}
+  const state = {
+    theme:savedTheme,
+    settingsOpen:false,
+    role:null,
+    loginRole:'student',
+    chat:{answer:null,input:'',historyOpen:false},
+    chatMode:'qa',
+    volunteerSubmitted:false,
+    resumeFile:null,
+    portfolioFiles:[],
+    internshipStarted:false,
+    internshipStartDate:'2026-10-29',
+    internshipExpectedEnd:'2027-03-18',
+    internshipStartEdits:0,
+    startEditOpen:false,
+    studentProfile:{
+      name:'李明',
+      studentNo:'2023001001',
+      className:'网传 2023 级',
+      unit:'汉阳区融媒体中心',
+      department:'新媒体部',
+      mentor:'朱亚兰',
+      mentorContact:'',
+      address:'武汉市汉阳区琴台大道 12 号',
+      emergencyContact:'李建国（父亲）',
+      emergencyPhone:'139 0000 1234'
+    },
+    teacherStudentDetail:null,
+    reportFeedback:null,
+    reportDraftHtml:'',
+    reportImages:[],
+    reportAttachments:[],
+    reports:JSON.parse(JSON.stringify(DATA.reports)),
+    studentHistory:JSON.parse(JSON.stringify(DATA.studentHistory)),
+    selectedReport:0,
+    dashboardTab:'placement',
+    teacherChallengeJob:null,
+    timelineEdit:false,
+    timeline:[
+      {date:'2026-12-01',label:'开始投递'},
+      {date:'2027-02-15',label:'开始实习'},
+      {date:'2027-06-30',label:'结束实习'}
+    ],
+    reportFilter:'待评价',
+    reportQuery:'',
+    lastScoredReport:null,
+    summaryGenerated:{},
+    summaryStarted:{},
+    summaryFailed:{},
+    summaryLoadingIndex:null,
+    applied:[],
+    challengeJobDetail:null,
+    challengeApplyTarget:null,
+    challengeResumeFile:null,
+    jobs:JSON.parse(JSON.stringify(DATA.enterpriseJobs)),
+    scoringTab:'pending',
+    scoringTarget:null,
+    applications:JSON.parse(JSON.stringify(DATA.applications)),
+    applicationDetail:null,
+    applicationFilter:'待处理',
+    studentFilter:'全部',
+    studentClassFilter:'全部',
+    studentUnitFilter:'全部',
+    studentQuery:'',
+    studentFilterOpen:false,
+    cohortImported:false,
+    cohortSize:236,
+    cohortStudents:[],
+    studentImportOpen:false,
+    studentImportRows:[],
+    studentImportFileName:'',
+    studentImportError:''
+  };
+
+  function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function formatDate(d){return d?String(d).replaceAll('-','.'):'待定'}
+  function formatSize(bytes){if(!bytes)return '';return bytes<1024*1024?Math.round(bytes/1024)+' KB':(bytes/1024/1024).toFixed(1)+' MB'}
+  function addWeeks(dateStr,n){const d=new Date(dateStr+'T00:00:00');d.setDate(d.getDate()+n*7);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+  function weeksSince(dateStr){const start=new Date(dateStr+'T00:00:00');const today=new Date('2026-10-29T00:00:00');return Math.max(0,Math.floor((today-start)/86400000/7))}
+  function profileForStudent(row){
+    if(!row)return state.studentProfile;
+    if(row[0]==='李明')return {...state.studentProfile,studentNo:row[5]||state.studentProfile.studentNo};
+    return {name:row[0],studentNo:row[5]||'—',className:row[1],unit:row[2],department:'待补充',mentor:row[4]==='—'?'待补充':row[4],mentorContact:'',address:'待补充',emergencyContact:'待补充',emergencyPhone:'待补充'};
+  }
+  function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2000)}
+  function navigate(path){location.hash='#/'+path}
+  function showToast(msg){toast(msg)}
+
+  const NAV = {
+    student:[
+      ['student/chat','经验问答',ICONS.chat,''],
+      ['student/volunteer','志愿填报',ICONS.doc,''],
+      ['student/internship','实习记录',ICONS.clock,''],
+      ['student/profile','个人信息',ICONS.users,''],
+      ['student/challenges','揭榜挂帅',ICONS.flag,'']
+    ],
+    teacher:[
+      ['teacher/dashboard','数据看板',ICONS.grid,''],
+      ['teacher/students','学生台账',ICONS.users,''],
+      ['teacher/reports','周报评价',ICONS.doc,'2'],
+      ['teacher/challenges','揭榜挂帅',ICONS.flag,'']
+    ],
+    enterprise:[
+      ['enterprise/jobs','发布岗位',ICONS.briefcase,''],
+      ['enterprise/applications','揭榜管理',ICONS.flag,''],
+      ['enterprise/scoring','实习评分',ICONS.star,'']
+    ]
+  };
+  const USERS = {
+    student:{name:'李明',sub:'网传 2023 级'},
+    teacher:{name:'王老师',sub:'新闻院教师'},
+    enterprise:{name:'周敏',sub:'汉阳融媒体 HR'}
+  };
+  const HOME = {student:'student/chat',teacher:'teacher/dashboard',enterprise:'enterprise/jobs'};
+  const STUDENT_IMPORT_SAMPLE_CSV='学号,姓名,身份证号\n2023001001,示例学生甲,420106200501010012\n2023001002,示例学生乙,420106200502020028\n2023001003,示例学生丙,420106200503030034';
+
+  function brand(){return `<div class="brandline"><img class="brandmark" src="assets/logo.png" alt="院徽"><div class="brandname">专业实习智能平台</div><div class="ver">v0.2</div></div>`}
+  function avatar(){return `<div class="avatar"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#dbe7ff"/><circle cx="16" cy="12" r="5" fill="#6b86b8"/><path d="M6 28c1.6-5.2 5.2-8 10-8s8.4 2.8 10 8" fill="#6b86b8"/></svg></div>`}
+
+  function sidebar(role,active){
+    const u=USERS[role];
+    const primary = role==='student' ? `<button class="primary-btn" onclick="navigate('student/chat')">${ICONS.plus}新对话</button>` : '';
+    const sideBlock = role==='student'
+      ? `<div class="side-label">最近入库</div><div class="side-list"><div class="side-list-row"><span>汉阳融媒体 · 第二周周报</span><span class="t">10-24</span></div><div class="side-list-row"><span>职业高手 · 10月18日岗位</span><span class="t">10-24</span></div><div class="side-list-row"><span>汉阳融媒体 · 第一周周报</span><span class="t">10-24</span></div></div><div class="side-label" style="margin-top:14px">大家在搜</div><div class="trend-list"><div class="trend-row" onclick="fillSearch('融媒体实习')"><span class="rank hot">1</span><span class="q">融媒体实习</span><span class="n">28 人搜过 🔥</span></div><div class="trend-row" onclick="fillSearch('实习周报模板')"><span class="rank hot">2</span><span class="q">实习周报模板</span><span class="n">21 人搜过 🔥</span></div><div class="trend-row" onclick="fillSearch('南方周末')"><span class="rank">3</span><span class="q">南方周末</span><span class="n">16 人搜过</span></div><div class="trend-row" onclick="fillSearch('新华社实习')"><span class="rank">4</span><span class="q">新华社实习</span><span class="n">9 人搜过</span></div></div>`
+      : role==='teacher'
+      ? `<div class="side-label">最近更新</div><div class="side-list"><div class="side-list-row"><span>语料库新增 5 篇</span><span class="t">10-24</span></div><div class="side-list-row"><span>周报评价 32 份</span><span class="t">10-27</span></div><div class="side-list-row"><span>岗位库更新</span><span class="t">10-28</span></div></div>`
+      : '';
+    const announcement = '本周五 15:00 学院 305 实习动员会，请 2023 级网传同学准时参加。';
+    const announceBlock = role==='enterprise' ? '' : `<div class="announce"><div class="announce-label"><i></i>公告</div><div class="announce-track"><span>${announcement}</span></div></div>`;
+    return `<aside class="side">${brand()}${primary}<nav>${NAV[role].map(([path,label,ico,tag])=>`<div class="nav-item ${active===path?'active':''}" onclick="navigate('${path}')">${ico}<span>${label}</span>${tag?`<span class="badge">${tag}</span>`:''}</div>`).join('')}</nav><div class="divider"></div>${sideBlock}<div class="side-bottom">${announceBlock}<div class="side-foot">${avatar()}<div class="who"><div class="name">${u.name}</div><div class="sub">${u.sub}</div></div><button class="foot-icon" onclick="toggleSettings()" title="设置">${ICONS.gear}</button>${state.settingsOpen?`<div class="settings-pop"><div class="set-item" onclick="toggleTheme()"><span class="set-ico">${ICONS.sun}</span><span>切换外观</span><em>${state.theme==='light'?'浅色':'深色'}</em></div><div class="set-item danger" onclick="logout()"><span class="set-ico">${ICONS.logout}</span><span>退出登录</span></div></div>`:''}</div></div></aside>`;
+  }
+
+  function head(title,sub,actions=''){return `<div class="page-head"><div><div class="crumb">${sub.crumb}</div><h1>${title}</h1>${sub.text?`<div class="sub">${sub.text}</div>`:''}</div><div class="actions">${actions}</div></div>`}
+  function shell(role,active,content,mainClass=''){return `<div class="app">${sidebar(role,active)}<main class="${mainClass}">${content}</main></div>`}
+
+  function renderLogin(){
+    const roles=[['student','学生'],['teacher','教师'],['enterprise','企业']];
+    return `<div class="login-page">
+      <section class="login-brand">
+        <div style="display:flex;align-items:center;gap:10px"><img class="brandmark" src="assets/logo.png" alt="院徽"><div class="brandname">专业实习智能平台</div><div class="ver">v0.2</div></div>
+        <div class="login-copy">
+          <div class="eyebrow">武汉大学新闻与传播学院</div>
+          <h1>实习助手<span class="l2">每个回答都有出处<span class="spark">${ICONS.spark}</span></span></h1>
+          <p class="desc">基于真实实习语料的问答平台，帮学生找到方向，帮学院看见真实需求。</p>
+          <div class="login-features"><span class="login-feature"><i></i>可溯源回答</span><span class="login-feature"><i></i>真实语料</span><span class="login-feature"><i></i>三端协同</span></div>
+        </div>
+        <div class="login-foot">© 2026 新闻与传播学院 · 专业实习智能平台</div>
+      </section>
+      <section class="login-panel">
+        <div class="login-card">
+          <h2>欢迎回来</h2><p class="lead">登录后继续使用实习助手</p>
+          <div class="roles">${roles.map(([k,l])=>`<button class="${state.loginRole===k?'active':''}" onclick="setLoginRole('${k}')">${l}</button>`).join('')}</div>
+          <label class="field-label">账号</label><input class="field" placeholder="学号 / 工号 / 邮箱">
+          <label class="field-label">密码</label><input class="field" type="password" placeholder="请输入密码">
+          <div class="login-row"><label><input type="checkbox"> 记住我</label><a href="javascript:void(0)" onclick="showToast('请通过学院邮箱重置密码')">忘记密码？</a></div>
+          <button class="login-primary" onclick="doLogin()">登录</button>
+          <div class="split">或</div>
+          <button class="ghost" onclick="demoLogin()">一键体验（免登录）</button>
+          <p class="login-note">演示环境，任意账号均可进入</p>
+        </div>
+      </section>
+    </div>`;
+  }
+
+  function setLoginRole(r){state.loginRole=r;render()}
+  function doLogin(){state.role=state.loginRole;navigate(HOME[state.role]);}
+  function demoLogin(){state.role=state.loginRole;toast('已进入'+USERS[state.role].name+'的演示账号');navigate(HOME[state.role]);}
+  function toggleSettings(){state.settingsOpen=!state.settingsOpen;render()}
+  function toggleTheme(){
+    state.theme=state.theme==='light'?'dark':'light';
+    try{localStorage.setItem('app-theme',state.theme)}catch{}
+    document.documentElement.dataset.theme=state.theme;
+    state.settingsOpen=false;
+    render();
+    toast(state.theme==='dark'?'已切换到深色外观':'已切换到浅色外观');
+  }
+  function logout(){
+    state.role=null;
+    state.settingsOpen=false;
+    state.chat={answer:null,input:'',historyOpen:false};
+    navigate('login');
+  }
+
+  function chatAnswer(q){
+    if(q.includes('保研')) return {html:'<p>语料中未找到相关内容。</p><p style="color:#8f959e;font-size:11.5px;margin-top:6px">已把这个问题记入内容缺口，教师端可以看到。</p>',sources:[]};
+    if(q.includes('岗位')||q.includes('招聘')) return {html:'<p>近期入库的岗位里，比较适合网传专业的有：</p><ul><li>新华社新媒体编辑：新闻传播优先，实习不少于 3 个月，每周线下 5 天 <span class="cite">[1]</span></li><li>南方周末社会新闻部：实习 3 个月以上，每周到岗 2–3 天，可线上 <span class="cite">[2]</span></li><li>汉阳区融媒体中心：采编拍摄实习生，熟悉秀米/PR/剪映 <span class="cite">[3]</span></li></ul>',sources:DATA.sources};
+    return {html:'<p>在汉阳区融媒体中心实习，主要做三块：</p><ul><li><strong>新媒体采编与运营：</strong>参与「汉阳知音」公众号推文排版、采写与发布 <span class="cite">[1]</span></li><li><strong>活动采拍与短视频：</strong>跟随老师外出拍摄，完成现场报道和短视频粗剪 <span class="cite">[2]</span></li><li><strong>媒体对接与素材整理：</strong>协助对接旅游博主、整理媒资库 <span class="cite">[1]</span></li></ul>',sources:DATA.sources};
+  }
+  function sendChat(){const el=document.getElementById('chatInput');const q=(el.value||'').trim();if(!q){toast(state.chatMode==='record'?'先描述一条实习成果':'先输入一个问题');return}state.chat.input=q;state.chat.answer=state.chatMode==='record'?recordAnswer(q):chatAnswer(q);state.chat.historyOpen=false;render();setTimeout(()=>document.getElementById('answerSection')?.scrollIntoView({behavior:'smooth',block:'nearest'}),50)}
+  function quickAsk(q){state.chat.input=q;state.chat.answer=chatAnswer(q);render();setTimeout(()=>document.getElementById('answerSection')?.scrollIntoView({behavior:'smooth',block:'nearest'}),50)}
+  function setChatMode(mode){state.chatMode=mode;state.chat.answer=null;state.chat.input='';render()}
+  function fillChatInput(text){state.chat.input=text;render();setTimeout(()=>document.getElementById('chatInput')?.focus(),30)}
+  function recordAnswer(q){
+    return {html:`<p>我已从你的描述中整理出以下记录：</p><ul><li><strong>项目：</strong>汉阳区融媒体中心实习</li><li><strong>成果：</strong>${esc(q.slice(0,60))}${q.length>60?'…':''}</li><li><strong>技能：</strong>公众号排版、短视频剪辑、现场采访</li><li><strong>下一步：</strong>补充量化产出，形成周报素材</li></ul><p>确认后会写入你的实习记录，并更新个人画像。</p><div style="margin-top:10px"><button class="btn small primary" onclick="showToast('已保存为实习记录')">保存为记录</button></div>`,sources:[]};
+  }
+  function fillSearch(q){state.chat.input=q;state.chat.answer=null;if(location.hash==='#/student/chat')render();else navigate('student/chat')}
+  function toggleHistory(){state.chat.historyOpen=!state.chat.historyOpen;render()}
+
+  function renderChat(){
+    const a=state.chat.answer;
+    const isRecord=state.chatMode==='record';
+    return shell('student','student/chat',`<div class="chat-hero">
+      <div class="tagline">${isRecord?'AI 帮你把实习成果整理成成长档案':'基于 AI 与真实语料的专业实习问答平台'}</div>
+      <h1>${isRecord?'记录助手':'实习助手'}<span class="l2">${isRecord?'把每次进展变成成长档案':'每个回答都有出处'}<span class="spark">${ICONS.spark}</span></span></h1>
+      <div class="seg"><div class="seg-item ${isRecord?'':'active'}" onclick="setChatMode('qa')">经验问答</div><div class="seg-item ${isRecord?'active':''}" onclick="setChatMode('record')">实习记录</div></div>
+      <div class="chips">${isRecord?`
+        <div class="chip" onclick="fillChatInput('本周我完成了……')">${ICONS.doc}记录本周成果</div>
+        <div class="chip" onclick="fillChatInput('我参与的作品有……')">${ICONS.briefcase}补充作品</div>
+        <div class="chip" onclick="fillChatInput('我这周学到的技能有……')">${ICONS.users}补充技能</div>
+        <div class="chip" onclick="showToast('请直接上传作品或截图')">上传截图</div>`:`
+        <div class="chip" onclick="quickAsk('最近有哪些实习岗位？')">${ICONS.search}找实习</div>
+        <div class="chip" onclick="quickAsk('实习周报怎么写')"><span style="color:#e0a52e">${ICONS.doc}</span>写周报</div>
+        <div class="chip" onclick="quickAsk('南方周末实习生有什么要求')">${ICONS.users}面试准备</div>
+        <div class="chip" onclick="fillChatInput('请帮我修改简历，目标是申请：')">${ICONS.doc}改简历</div>
+        <div class="chip" onclick="showToast('更多快捷提问即将上线')">更多</div>`}</div>
+      <div class="input-card">
+        <textarea class="chat-input" id="chatInput" placeholder="${isRecord?'描述你本周完成的工作、作品或进展，AI 会帮你整理成实习记录':'问一个实习问题，比如：汉阳区融媒体中心实习都做什么？'}" style="${isRecord?'min-height:80px':''}">${esc(state.chat.input)}</textarea>
+        <div class="input-bar">
+          <div class="bar-left">
+            <button class="round-btn" onclick="showToast('已打开语料文件选择')">＋</button>
+          </div>
+          <div class="bar-right">
+            <button class="round-btn" onclick="showToast('语音输入已就绪')">${ICONS.mic}</button>
+            <button class="send" onclick="sendChat()">${ICONS.send}</button>
+          </div>
+        </div>
+      </div>
+      <div class="hint-row">
+        <div class="hint">${isRecord?`<span>${ICONS.chevron}提取项目 / 任务 / 技能 / 成果</span><span>${ICONS.chevron}保存后更新个人画像</span>`:`<span>${ICONS.chevron}与 5 篇语料对话</span><span>${ICONS.chevron}只回答语料里的内容</span>`}</div>
+        <div class="history-wrap" style="${isRecord?'display:none':''}"><button class="history-btn" onclick="toggleHistory()">${ICONS.clock}历史对话 ${ICONS.chevron}</button>
+          ${state.chat.historyOpen?`<div class="popover"><div class="pop-head">历史对话 <span>最近 5 条</span></div>${DATA.history.map(([q,t])=>`<div class="pop-item" onclick="quickAsk('${q.replace(/'/g,"\\'")}')"><span class="q">${q}</span><span class="t">${t}</span></div>`).join('')}<div class="pop-foot" onclick="showToast('已加载全部历史记录')">查看全部历史 →</div></div>`:''}
+        </div>
+      </div>
+      ${a?`<div class="answer-card" id="answerSection"><div class="answer-head"><span class="answer-badge">${isRecord?'AI 记录助手':'DeepSeek 语料溯源回答'}</span><span style="font-size:10.5px;color:#8f959e">${isRecord?'从对话中提取实习成果':'已检索 5 篇真实语料'}</span></div><div class="answer-body">${a.html}</div>${!isRecord&&a.sources.length?`<div class="source-grid">${a.sources.map(([t,m],i)=>`<div class="source-card" onclick="showToast('打开语料原文：${t}')"><b>[${i+1}] ${t}</b><span>${m} · 点击预览原文</span></div>`).join('')}</div>`:''}</div>`:''}
+    </div>`, 'chat-main');
+  }
+
+  function renderVolunteer(){
+    const submitted=state.volunteerSubmitted;
+    return shell('student','student/volunteer',`${head('志愿填报',{crumb:'学生端 / 志愿填报',text:'填写实习志愿，查看审核进度'},`<a class="btn" href="assets/专业实习志愿表.pdf" download="专业实习志愿表.pdf">${ICONS.download}下载纸质版志愿表</a>`)}
+      ${submitted?`<div class="notice" style="margin-bottom:12px">志愿已提交，当前状态：<b style="color:#b4690e">审核中</b>。学院审核后会在这里更新。</div>`:''}
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-head"><div><div class="card-title">实习时间安排</div><div class="card-sub">以下时间由学院统一设置</div></div></div>
+        <div class="timeline" style="margin-top:8px">${state.timeline.map(t=>`<div class="timeline-item"><div class="timeline-month">${formatDate(t.date)}</div><div class="timeline-dot"></div><div class="timeline-label">${t.label}</div></div>`).join('')}</div>
+        <div class="foot-note">请按时间节点完成志愿填报与确认；如有调整以学院最新通知为准。</div>
+      </div>
+      <div class="grid-2">
+        <form class="form-card" onsubmit="submitVolunteer(event)">
+          <div class="card-title" style="margin-bottom:12px">填写志愿</div>
+          <div class="form-grid">
+            <div><label class="field-label">第一志愿</label><select class="select" name="v1"><option>汉阳区融媒体中心</option><option>南方周末</option><option>新华社新媒体</option></select></div>
+            <div><label class="field-label">意向岗位</label><input class="field" name="role" placeholder="如：新媒体采编"></div>
+            <div><label class="field-label">第二志愿</label><select class="select" name="v2"><option>南方周末</option><option>汉阳区融媒体中心</option><option>凤凰网</option></select></div>
+            <div><label class="field-label">是否服从调剂</label><select class="select" name="adjust"><option>是</option><option>否</option></select></div>
+            <div class="full"><label class="field-label">申请理由</label><textarea class="textarea" name="reason" placeholder="简单说明你的兴趣、作品或相关经历"></textarea></div>
+            <div class="full">
+              <label class="field-label">附件</label>
+              <div class="upload-grid">
+                <label class="upload-box" for="resumeInput"><input id="resumeInput" type="file" accept=".pdf,.doc,.docx" hidden onchange="handleResume(event)"><span class="upload-icon">${ICONS.doc}</span><span><span class="upload-title">简历（必填）</span><span class="upload-hint">PDF / DOC / DOCX，≤10MB</span></span></label>
+                <label class="upload-box" for="portfolioInput"><input id="portfolioInput" type="file" accept=".pdf,.zip,.jpg,.jpeg,.png" multiple hidden onchange="handlePortfolio(event)"><span class="upload-icon">${ICONS.briefcase}</span><span><span class="upload-title">作品集（选填）</span><span class="upload-hint">PDF / ZIP / 图片，最多 3 个</span></span></label>
+              </div>
+              <div class="file-chips">
+                ${state.resumeFile?`<span class="file-chip"><span class="kind">简历</span>${esc(state.resumeFile.name)}<span>${formatSize(state.resumeFile.size)}</span><button type="button" onclick="removeResume()">×</button></span>`:''}
+                ${state.portfolioFiles.map((f,i)=>`<span class="file-chip"><span class="kind">作品集</span>${esc(f.name)}<span>${formatSize(f.size)}</span><button type="button" onclick="removePortfolio(${i})">×</button></span>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="form-actions"><button type="button" class="btn" onclick="showToast('草稿已保存')">保存草稿</button><button class="btn primary" type="submit">提交志愿</button></div>
+        </form>
+        <div class="col">
+          <div class="card"><div class="card-head"><div><div class="card-title">往届去向参考</div><div class="card-sub">网传专业 · 近一年</div></div></div>
+            <div class="q-row"><span class="text">汉阳区融媒体中心</span><span class="track"><span class="fill" style="width:92%"></span></span><span class="num">18</span></div>
+            <div class="q-row"><span class="text">南方周末</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="num">13</span></div>
+            <div class="q-row"><span class="text">新华社新媒体</span><span class="track"><span class="fill" style="width:48%"></span></span><span class="num">9</span></div>
+            <div class="q-row"><span class="text">凤凰网</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="num">7</span></div>
+          </div>
+          <div class="card"><div class="card-head"><div><div class="card-title">我的志愿</div><div class="card-sub">最近一次提交</div></div><span class="status ${submitted?'pending':'gray'}">${submitted?'审核中':'待提交'}</span></div>
+            <div class="job-meta">第一志愿：汉阳区融媒体中心<br>意向岗位：新媒体采编<br>提交时间：${submitted?'2026-10-29 14:20':'—'}<br>附件：${state.resumeFile?esc(state.resumeFile.name):'未上传'}${state.portfolioFiles.length?` · 作品集 ${state.portfolioFiles.length} 个`:''}</div>
+          </div>
+        </div>
+      </div>`)
+  }
+  function submitVolunteer(e){e.preventDefault();if(!state.resumeFile){toast('请先上传简历');return}state.volunteerSubmitted=true;toast('志愿已提交，等待学院审核');render()}
+  function handleResume(e){
+    const f=e.target.files[0];e.target.value='';
+    if(!f)return;
+    if(!/\.(pdf|doc|docx)$/i.test(f.name)){toast('简历仅支持 PDF / DOC / DOCX');return}
+    if(f.size>10*1024*1024){toast('简历不能超过 10MB');return}
+    state.resumeFile={name:f.name,size:f.size,type:f.type};
+    toast('简历已添加');
+    render();
+  }
+  function handlePortfolio(e){
+    const files=[...e.target.files];e.target.value='';
+    const allowed=/\.(pdf|zip|jpg|jpeg|png)$/i;
+    const added=[];
+    for(const f of files){
+      if(!allowed.test(f.name)){toast('作品集格式不支持：'+f.name);continue}
+      if(f.size>20*1024*1024){toast('单个作品集不能超过 20MB');continue}
+      if(state.portfolioFiles.length+added.length>=3){toast('作品集最多 3 个');break}
+      if(state.portfolioFiles.some(x=>x.name===f.name)||added.some(x=>x.name===f.name))continue;
+      added.push({name:f.name,size:f.size,type:f.type});
+    }
+    if(added.length){state.portfolioFiles=[...state.portfolioFiles,...added];toast('已添加 '+added.length+' 个作品集文件');render()}
+  }
+  function removeResume(){state.resumeFile=null;render()}
+  function removePortfolio(i){state.portfolioFiles.splice(i,1);render()}
+
+  function renderStudentProfile(){
+    const p=state.studentProfile;
+    return shell('student','student/profile',`${head('个人信息',{crumb:'学生端 / 个人信息',text:'填写后同步到教师端的实习卡片'},'')}
+      <div class="grid-2">
+        <form class="form-card" onsubmit="saveStudentProfile(event)">
+          <div class="card-title" style="margin-bottom:12px">实习与联系信息</div>
+          <div class="form-grid">
+            <div><label class="field-label">姓名</label><input class="field" name="name" value="${esc(p.name)}"></div>
+            <div><label class="field-label">班级</label><input class="field" name="className" value="${esc(p.className)}"></div>
+            <div><label class="field-label">实习单位</label><input class="field" name="unit" value="${esc(p.unit)}"></div>
+            <div><label class="field-label">单位部门</label><input class="field" name="department" value="${esc(p.department)}"></div>
+            <div><label class="field-label">实习导师</label><input class="field" name="mentor" value="${esc(p.mentor)}"></div>
+            <div><label class="field-label">导师联系方式（可为空）</label><input class="field" name="mentorContact" value="${esc(p.mentorContact)}" placeholder="手机 / 邮箱"></div>
+            <div class="full"><label class="field-label">实习期居住地址</label><input class="field" name="address" value="${esc(p.address)}"></div>
+            <div><label class="field-label">实习期紧急联系人</label><input class="field" name="emergencyContact" value="${esc(p.emergencyContact)}"></div>
+            <div><label class="field-label">紧急联系人联系方式</label><input class="field" name="emergencyPhone" value="${esc(p.emergencyPhone)}"></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" type="submit">保存个人信息</button></div>
+        </form>
+        <div class="card"><div class="card-head"><div><div class="card-title">信息用途</div><div class="card-sub">教师端实习卡片会读取这些字段</div></div></div><div class="notice">保存后，教师端「学生台账 → 详细信息」中的实习卡片会同步更新。导师联系方式可以留空；紧急联系人信息仅用于实习期间联系。</div><div class="profile-row"><b>同步对象</b>教师端实习卡片</div><div class="profile-row"><b>可见范围</b>本人及有权限的教师</div><div class="profile-row"><b>紧急联系人</b>${esc(p.emergencyContact)} · ${esc(p.emergencyPhone)}</div></div>
+      </div>`)
+  }
+  function saveStudentProfile(e){
+    e.preventDefault();
+    const f=new FormData(e.target);
+    state.studentProfile={
+      name:f.get('name')||'',className:f.get('className')||'',unit:f.get('unit')||'',department:f.get('department')||'',mentor:f.get('mentor')||'',mentorContact:f.get('mentorContact')||'',address:f.get('address')||'',emergencyContact:f.get('emergencyContact')||'',emergencyPhone:f.get('emergencyPhone')||''
+    };
+    toast('个人信息已保存，并同步到教师端实习卡片');
+    render();
+  }
+
+  function renderInternship(){
+    if(!state.internshipStarted){
+      return shell('student','student/internship',`${head('实习记录',{crumb:'学生端 / 实习记录',text:'开启实习生活后，开始记录每周进展'},'')}
+        <div class="card" style="max-width:720px;margin:56px auto;padding:36px;text-align:center">
+          <div class="start-icon">${ICONS.briefcase}</div>
+          <h2 style="font-size:22px;margin:14px 0 8px">开启实习生活</h2>
+          <p style="font-size:13px;color:#8f959e;line-height:1.8;max-width:460px;margin:0 auto 18px">确认你的实习开始时间。开启后可以提交周报，开始时间会同步给学院老师。</p>
+          <label class="field-label" style="display:block;text-align:left;max-width:240px;margin:0 auto 8px">实习开始日期</label>
+          <input class="field" id="startDateInput" type="date" value="2026-10-29" style="max-width:240px;margin:0 auto 18px">
+          <button class="btn primary" style="height:40px;padding:0 22px" onclick="startInternship()">开启实习生活</button>
+          <div class="foot-note" style="margin-top:14px">开启后，周报提交入口才会出现</div>
+        </div>`)
+    }
+    const start=state.internshipStartDate;
+    const end=state.internshipExpectedEnd||addWeeks(start,20);
+    const weeks=Math.min(20,Math.max(1,Math.floor(weeksSince(start))+1));
+    const progress=Math.min(100,Math.round(weeks/20*100));
+    return shell('student','student/internship',`${head('实习记录',{crumb:'学生端 / 实习记录',text:`第 ${weeks} 周 / 共 20 周 · 汉阳区融媒体中心`},'')}
+      <div class="grid-2">
+        <div class="col">
+          <div class="card"><div class="card-head"><div><div class="card-title">实习周期</div><div class="card-sub">开始时间会同步给学院老师 · 共 20 周</div></div><span class="status pending">进行中</span></div><div class="timeline" style="margin-top:12px"><div class="timeline-item"><div class="timeline-month">${formatDate(start)}</div><div class="timeline-dot"></div><div class="timeline-label">开始实习</div></div><div class="timeline-item"><div class="timeline-month">${formatDate(end)}</div><div class="timeline-dot"></div><div class="timeline-label">预计结束</div></div></div><div class="progress" style="margin-top:16px"><span style="width:${progress}%"></span></div><div class="foot-note">第 ${weeks} 周 / 共 20 周 · 本周周报截止：周日 22:00</div>${state.startEditOpen?`<div class="start-edit"><label class="field-label" style="margin:0">开始</label><input class="field" id="editStartDate" type="date" value="${start}" style="width:150px"><label class="field-label" style="margin:0">预计结束</label><input class="field" id="editExpectedEnd" type="date" value="${end}" style="width:150px"><button class="btn small primary" onclick="saveStartEdit()">保存</button><button class="btn small" onclick="state.startEditOpen=false;render()">取消</button></div>`:`<div class="start-edit"><button class="btn small" onclick="toggleStartEdit()">修改实习时间</button></div>`}</div>
+          <form class="form-card" onsubmit="submitReport(event)">
+            <div class="card-title" style="margin-bottom:12px">提交本周周报</div>
+            <div class="form-grid">
+              <div><label class="field-label">周次</label><input class="field" value="第 7 周" name="week"></div>
+              <div><label class="field-label">实习单位</label><input class="field" value="汉阳区融媒体中心" disabled></div>
+              <div class="full"><label class="field-label">本周工作内容</label><div class="rich-toolbar"><button type="button" onclick="richCmd('bold')"><b>B</b></button><button type="button" onclick="richCmd('italic')"><i>I</i></button><button type="button" onclick="richCmd('insertUnorderedList')">• 列表</button><button type="button" onclick="document.getElementById('reportImageInput').click()">插入图片</button><button type="button" onclick="document.getElementById('reportFileInput').click()">插入附件</button><input id="reportImageInput" type="file" accept="image/*" multiple hidden onchange="handleReportImages(event)"><input id="reportFileInput" type="file" accept=".pdf,.doc,.docx,.zip,.png,.jpg,.jpeg" multiple hidden onchange="handleReportFiles(event)"></div><div class="rich-editor" id="reportContent" contenteditable="true" data-placeholder="参与的项目、完成的任务、产出数量；可以插入图片或附件" oninput="state.reportDraftHtml=this.innerHTML">${state.reportDraftHtml}</div><div class="file-chips">${state.reportImages.map((f,i)=>`<span class="file-chip"><span class="kind">图片</span>${esc(f.name)}<span>${formatSize(f.size)}</span><button type="button" onclick="removeReportImage(${i})">×</button></span>`).join('')}${state.reportAttachments.map((f,i)=>`<span class="file-chip"><span class="kind">附件</span>${esc(f.name)}<span>${formatSize(f.size)}</span><button type="button" onclick="removeReportFile(${i})">×</button></span>`).join('')}</div></div>
+              <div class="full"><label class="field-label">收获与反思</label><textarea class="textarea" name="reflect" placeholder="学到了什么、遇到什么问题"></textarea></div>
+              <div class="full"><label class="field-label">下周计划</label><input class="field" name="plan" placeholder="下周想跟进的事项"></div>
+            </div>
+            <div class="form-actions"><button type="button" class="btn" onclick="showToast('草稿已保存')">保存草稿</button><button class="btn primary" type="submit">提交周报</button></div>
+          </form>
+        </div>
+        <div class="card"><div class="card-head"><div><div class="card-title">历史周报</div><div class="card-sub">已提交 6 份</div></div></div>
+          ${state.studentHistory.map(h=>`<div class="gap-row"><span class="text">${h.week} · ${h.status==='待评价'?'汉阳融媒体采编':'日常实习记录'}</span>${h.status==='待评价'?`<span class="status pending">待评价</span>`:`<span class="level ${h.level==='特别优秀'?'special':h.level==='优秀'?'excellent':'pass'}">${h.level}</span><span class="foot-note" style="margin:0 4px">${h.score} 分</span><button class="btn small" onclick="openReportFeedback('${h.week}')">查看</button>`}</div>`).join('')}
+        </div>
+      </div>${state.reportFeedback?renderReportFeedbackModal():''}`)
+  }
+  function startInternship(){
+    const d=document.getElementById('startDateInput')?.value;
+    if(!d){toast('请选择实习开始日期');return}
+    state.internshipStarted=true;
+    state.internshipStartDate=d;
+    state.internshipExpectedEnd=addWeeks(d,20);
+    state.internshipStartEdits=0;
+    toast('已开启实习生活，开始时间已记录');
+    render();
+  }
+  function toggleStartEdit(){
+    state.startEditOpen=!state.startEditOpen;
+    render();
+  }
+  function saveStartEdit(){
+    const d=document.getElementById('editStartDate')?.value;
+    const e=document.getElementById('editExpectedEnd')?.value;
+    if(!d||!e){toast('请选择开始日期和预计结束日期');return}
+    state.internshipStartDate=d;
+    state.internshipExpectedEnd=e;
+    state.internshipStartEdits++;
+    state.startEditOpen=false;
+    toast('开始时间已更新，并同步给学院');
+    render();
+  }
+  function openReportFeedback(week){state.reportFeedback=week;render()}
+  function renderReportFeedbackModal(){
+    const h=state.studentHistory.find(x=>x.week===state.reportFeedback)||{week:state.reportFeedback,level:'合格',score:6,tags:[],comment:'本周按计划完成实习任务。'};
+    return `<div class="modal-bg"><div class="modal" style="width:520px"><div class="modal-head"><h3>${h.week} · 教师评价</h3><button class="modal-close" onclick="state.reportFeedback=null;render()">×</button></div><div class="job-meta" style="margin-bottom:10px">评价教师：王老师 · 评价时间：2026-10-28</div><div class="feedback-scores"><div class="feedback-score">报告等级 <b>${h.level}</b></div><div class="feedback-score">本周得分 <b>${h.score}</b></div></div>${h.tags.length?`<div class="job-tags" style="margin-bottom:10px">${h.tags.map(t=>`<span class="job-tag">${t}</span>`).join('')}</div>`:''}<div class="card" style="padding:12px"><div class="card-title" style="margin-bottom:6px">评语</div><div class="answer-body" style="font-size:12.5px">${h.comment}</div></div></div></div>`;
+  }
+  function richCmd(cmd){document.execCommand(cmd,false,null);document.getElementById('reportContent')?.focus()}
+  function handleReportImages(e){
+    const files=[...e.target.files];e.target.value='';
+    for(const f of files){
+      if(!f.type.startsWith('image/')){toast('请选择图片文件');continue}
+      if(f.size>10*1024*1024){toast('单张图片不能超过 10MB');continue}
+      state.reportImages.push({name:f.name,size:f.size});
+    }
+    if(files.length)render();
+  }
+  function handleReportFiles(e){
+    const files=[...e.target.files];e.target.value='';
+    const allowed=/\.(pdf|doc|docx|zip|png|jpg|jpeg)$/i;
+    for(const f of files){
+      if(!allowed.test(f.name)){toast('附件格式不支持：'+f.name);continue}
+      if(f.size>20*1024*1024){toast('单个附件不能超过 20MB');continue}
+      if(state.reportAttachments.length>=5){toast('周报最多 5 个附件');break}
+      state.reportAttachments.push({name:f.name,size:f.size});
+    }
+    if(files.length)render();
+  }
+  function removeReportImage(i){state.reportImages.splice(i,1);render()}
+  function removeReportFile(i){state.reportAttachments.splice(i,1);render()}
+  function submitReport(e){
+    e.preventDefault();
+    const f=new FormData(e.target);
+    const editor=document.getElementById('reportContent');
+    const content=editor?editor.innerText.trim():'';
+    if(!content){toast('请填写本周工作内容');return}
+    const week=f.get('week')||'第 7 周';
+    state.reports.unshift({student:'李明',week,unit:'汉阳区融媒体中心',status:'待评价',content});
+    state.studentHistory.unshift({week,status:'待评价'});
+    state.reportDraftHtml='';state.reportImages=[];state.reportAttachments=[];
+    toast('周报已提交，等待教师评价');
+    render();
+  }
+
+  function renderChallenges(){
+    return shell('student','student/challenges',`${head('揭榜挂帅',{crumb:'学生端 / 揭榜挂帅',text:'企业发布真实岗位，学生揭榜，mentor 直接评分'},`<span class="status ok">同步上线</span>`)}
+      <div class="notice" style="margin-bottom:12px">揭榜挂帅与企业端岗位管理同步上线，支持“企业发岗 → 学生揭榜 → 企业评分”的完整流程。</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        ${DATA.jobs.map(([unit,title,city,req],i)=>{const done=state.applied.includes(i);return `<div class="job-card challenge-job-card" role="button" tabindex="0" onclick="openChallengeJobDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openChallengeJobDetail(${i})}"><div><div class="card-title">${title}</div><div class="job-meta" style="margin-top:5px">${unit} · ${city}</div></div><div class="job-tags"><span class="job-tag">${req}</span><span class="job-tag">mentor 评分</span></div><div class="job-foot"><span class="job-meta">查看岗位详情 →</span><button class="btn small ${done?'':'primary'}" ${done?'disabled':''} onclick="event.stopPropagation();openChallengeApply(${i})">${done?'已揭榜':'立即揭榜'}</button></div></div>`}).join('')}
+      </div>${state.challengeJobDetail!==null?renderChallengeJobDetailModal():''}${state.challengeApplyTarget!==null?renderChallengeApplyModal():''}`)
+  }
+  function openChallengeJobDetail(i){
+    state.challengeJobDetail=i;
+    state.challengeApplyTarget=null;
+    state.challengeResumeFile=null;
+    render();
+  }
+  function closeChallengeJobDetail(){
+    state.challengeJobDetail=null;
+    render();
+  }
+  function startChallengeApplyFromDetail(i){
+    state.challengeJobDetail=null;
+    openChallengeApply(i);
+  }
+  function renderChallengeJobDetailModal(){
+    const i=state.challengeJobDetail;
+    const job=DATA.jobs[i];
+    const detail=CHALLENGE_JOB_DETAILS[i];
+    if(!job||!detail)return '';
+    const [unit,title,city,req]=job;
+    const done=state.applied.includes(i);
+    return `<div class="modal-bg"><div class="modal" style="width:700px"><div class="modal-head"><div><h3>${esc(title)}</h3><div class="job-meta" style="margin-top:4px">${esc(unit)} · ${esc(city)}</div></div><button class="modal-close" onclick="closeChallengeJobDetail()">×</button></div>
+      <div class="job-tags" style="margin-bottom:12px"><span class="job-tag">${esc(req)}</span><span class="job-tag">企业 mentor 评分</span></div>
+      <div class="notice" style="margin-bottom:14px">${esc(detail.summary)}</div>
+      <div style="max-height:58vh;overflow:auto;padding-right:6px">
+        <div class="job-detail-section"><h4>岗位职责</h4><ol>${detail.responsibilities.map(item=>`<li>${esc(item)}</li>`).join('')}</ol></div>
+        <div class="job-detail-section" style="margin-top:18px"><h4>任职要求</h4><ol>${detail.requirements.map(item=>`<li>${esc(item)}</li>`).join('')}</ol></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeChallengeJobDetail()">关闭</button><button class="btn ${done?'':'primary'}" ${done?'disabled':''} onclick="startChallengeApplyFromDetail(${i})">${done?'已揭榜':'立即揭榜'}</button></div>
+    </div></div>`;
+  }
+  function openChallengeApply(i){
+    if(state.applied.includes(i))return;
+    state.challengeJobDetail=null;
+    state.challengeApplyTarget=i;
+    state.challengeResumeFile=null;
+    render();
+  }
+  function closeChallengeApply(){
+    state.challengeApplyTarget=null;
+    state.challengeResumeFile=null;
+    render();
+  }
+  function handleChallengeResume(e){
+    const file=e.target.files?.[0];
+    e.target.value='';
+    if(!file)return;
+    if(!/\.pdf$/i.test(file.name)){toast('请上传 PDF 格式的简历');return}
+    if(file.size>10*1024*1024){toast('简历文件不能超过 10MB');return}
+    state.challengeResumeFile={name:file.name,size:file.size};
+    render();
+  }
+  function removeChallengeResume(){
+    state.challengeResumeFile=null;
+    render();
+  }
+  function confirmChallengeApplication(){
+    const i=state.challengeApplyTarget;
+    const job=DATA.jobs[i];
+    if(!job||!state.challengeResumeFile){toast('请先上传 PDF 简历');return}
+    if(!state.applied.includes(i))state.applied.push(i);
+    const title=job[1];
+    if(!state.applications.some(a=>a[0]===state.studentProfile.name&&a[1]===title)){
+      state.applications.unshift([state.studentProfile.name,title,'10-29 22:30','待处理']);
+    }
+    state.applicationFilter='待处理';
+    state.challengeApplyTarget=null;
+    state.challengeResumeFile=null;
+    toast('揭榜已提交，等待企业查看简历');
+    render();
+  }
+  function renderChallengeApplyModal(){
+    const job=DATA.jobs[state.challengeApplyTarget];
+    if(!job)return '';
+    const [unit,title,city,req]=job;
+    const file=state.challengeResumeFile;
+    return `<div class="modal-bg"><div class="modal" style="width:560px"><div class="modal-head"><div><h3>确认揭榜 · ${esc(title)}</h3><div class="job-meta" style="margin-top:4px">${esc(unit)} · ${esc(city)}</div></div><button class="modal-close" onclick="closeChallengeApply()">×</button></div>
+      <div class="notice">请上传你的 PDF 简历。只有上传简历并点击“确认揭榜”后，申请才会正式提交给企业。</div>
+      <div class="profile-grid" style="margin-top:12px"><div class="profile-row"><b>姓名</b>${esc(state.studentProfile.name)}</div><div class="profile-row"><b>学号</b>${esc(state.studentProfile.studentNo||'—')}</div><div class="profile-row"><b>班级</b>${esc(state.studentProfile.className)}</div><div class="profile-row"><b>岗位要求</b>${esc(req)}</div></div>
+      <div style="margin-top:12px"><label class="field-label">简历附件（必填）</label><div class="upload-grid"><label class="upload-box" for="challengeResumeInput"><input id="challengeResumeInput" type="file" accept=".pdf,application/pdf" hidden onchange="handleChallengeResume(event)"><span class="upload-icon">${ICONS.doc}</span><span><span class="upload-title">${file?'重新选择简历':'上传 PDF 简历'}</span><span class="upload-hint">仅支持 PDF，文件不超过 10MB</span></span></label></div>${file?`<div class="file-chips"><span class="file-chip"><span class="kind">简历</span>${esc(file.name)}<span>${formatSize(file.size)}</span><button type="button" onclick="removeChallengeResume()">×</button></span></div>`:''}</div>
+      <div class="form-actions"><button class="btn" onclick="closeChallengeApply()">取消</button><button class="btn primary" ${file?'':'disabled'} onclick="confirmChallengeApplication()">确认揭榜</button></div>
+    </div></div>`;
+  }
+
+  function openStudentImport(){
+    state.studentImportOpen=true;
+    state.studentImportRows=[];
+    state.studentImportFileName='';
+    state.studentImportError='';
+    render();
+  }
+  function closeStudentImport(){
+    state.studentImportOpen=false;
+    state.studentImportError='';
+    render();
+  }
+  function parseCsvLine(line){
+    const cells=[];let value='';let quoted=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){
+        if(quoted&&line[i+1]==='"'){value+='"';i++}else quoted=!quoted;
+      }else if(ch===','&&!quoted){cells.push(value.trim());value=''}else value+=ch;
+    }
+    cells.push(value.trim());
+    return cells;
+  }
+  function maskIdNumber(id){return id.length>8?`${id.slice(0,4)}${'*'.repeat(id.length-8)}${id.slice(-4)}`:'****'}
+  function parseStudentImportCsv(text){
+    const lines=String(text).replace(/^\uFEFF/,'').split(/\r?\n/).filter(line=>line.trim());
+    if(lines.length<2)return {rows:[],error:'文件为空，或只有表头没有学生数据'};
+    const headers=parseCsvLine(lines[0]).map(h=>h.replace(/\s+/g,'').toLowerCase());
+    const noIndex=headers.findIndex(h=>['学号','student_id','studentno'].includes(h));
+    const nameIndex=headers.findIndex(h=>['姓名','name'].includes(h));
+    const idIndex=headers.findIndex(h=>['身份证号','id_number','idnumber'].includes(h));
+    if([noIndex,nameIndex,idIndex].some(i=>i<0))return {rows:[],error:'表头缺少必填列：学号、姓名、身份证号'};
+    const seenNos=new Set();
+    const seenIds=new Set();
+    const rows=lines.slice(1).map((line,i)=>{
+      const cells=parseCsvLine(line);
+      const studentNo=(cells[noIndex]||'').trim();
+      const name=(cells[nameIndex]||'').trim();
+      const idNumber=(cells[idIndex]||'').trim().toUpperCase();
+      const errors=[];
+      if(!/^[A-Za-z0-9-]{4,30}$/.test(studentNo))errors.push('学号格式不正确');
+      if(name.length<2||name.length>20)errors.push('姓名长度应为 2–20 字');
+      if(!/^\d{17}[\dX]$/.test(idNumber))errors.push('身份证号应为 18 位');
+      if(seenNos.has(studentNo))errors.push('学号重复');else if(studentNo)seenNos.add(studentNo);
+      if(seenIds.has(idNumber))errors.push('身份证号重复');else if(idNumber)seenIds.add(idNumber);
+      return {line:i+2,studentNo,name,idMasked:maskIdNumber(idNumber),valid:errors.length===0,message:errors.join('；')||'可自动创建账号'};
+    });
+    return {rows,error:''};
+  }
+  function loadStudentImportSample(){
+    const parsed=parseStudentImportCsv(STUDENT_IMPORT_SAMPLE_CSV);
+    state.studentImportFileName='示例学生名单.csv';
+    state.studentImportRows=parsed.rows;
+    state.studentImportError=parsed.error;
+    render();
+  }
+  function handleStudentImportFile(e){
+    const file=e.target.files?.[0];
+    e.target.value='';
+    if(!file)return;
+    if(!/\.csv$/i.test(file.name)){state.studentImportError='当前原型支持 CSV；正式版后端将同时支持 Excel';state.studentImportRows=[];render();return}
+    if(file.size>5*1024*1024){state.studentImportError='名单文件不能超过 5MB';state.studentImportRows=[];render();return}
+    file.text().then(text=>{
+      const parsed=parseStudentImportCsv(text);
+      state.studentImportFileName=file.name;
+      state.studentImportRows=parsed.rows;
+      state.studentImportError=parsed.error;
+      render();
+    }).catch(()=>{
+      state.studentImportError='文件读取失败，请重新选择';
+      state.studentImportRows=[];
+      render();
+    });
+  }
+  function downloadStudentTemplate(){
+    const csv='\uFEFF学号,姓名,身份证号\n2023001001,示例学生甲,420106200501010012\n';
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='学生名单导入模板.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function confirmStudentImport(){
+    const validRows=state.studentImportRows.filter(r=>r.valid);
+    if(!validRows.length||validRows.length!==state.studentImportRows.length){toast('名单中仍有错误行，请修正后再提交');return}
+    state.cohortStudents=validRows.map(r=>({studentNo:r.studentNo,name:r.name,idMasked:r.idMasked,accountStatus:'已创建'}));
+    state.cohortSize=validRows.length;
+    state.cohortImported=true;
+    state.studentImportOpen=false;
+    state.studentImportRows=[];
+    toast(`已导入 ${validRows.length} 名学生，账号已自动创建`);
+    render();
+  }
+  function renderStudentImportModal(){
+    const rows=state.studentImportRows;
+    const validCount=rows.filter(r=>r.valid).length;
+    const invalidCount=rows.length-validCount;
+    return `<div class="modal-bg"><div class="modal student-import-modal">
+      <div class="student-import-head"><div><h3>批量导入本届学生名单</h3><div class="job-meta">2026 秋季 · 导入后自动创建学生账号并更新应实习人数</div></div><button class="modal-close" onclick="closeStudentImport()">×</button></div>
+      <div class="notice"><b>导入规则：</b>必填学号、姓名、身份证号；重复学号或身份证号会被拦截。账号初始密码为身份证后六位，首次登录必须修改密码。身份证号仅用于身份校验与初始密码生成，界面只展示脱敏值。</div>
+      <div class="student-import-actions"><button class="btn" onclick="downloadStudentTemplate()">下载 CSV 模板</button><button class="btn" onclick="loadStudentImportSample()">载入示例名单</button></div>
+      <div class="import-file-box"><div><strong>${state.studentImportFileName?esc(state.studentImportFileName):'选择学生名单文件'}</strong><span>支持 CSV，最多 5MB；正式版后端可解析 Excel</span></div><button class="btn primary" onclick="document.getElementById('studentRosterFile').click()">选择文件</button><input id="studentRosterFile" type="file" accept=".csv,text/csv" hidden onchange="handleStudentImportFile(event)"></div>
+      ${state.studentImportError?`<div class="notice" style="margin-top:10px;color:#b3261e;background:#fff7f6;border-color:#f4d5d1">${esc(state.studentImportError)}</div>`:''}
+      ${rows.length?`<div class="result-summary" style="margin-top:12px"><span>共 ${rows.length} 条 · ${validCount} 条可导入 · ${invalidCount} 条待修正</span>${invalidCount?`<span style="color:#b3261e">请先修正错误再提交</span>`:''}</div><div class="import-preview"><table class="table"><thead><tr><th>行号</th><th>学号</th><th>姓名</th><th>身份证号</th><th>校验结果</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.line}</td><td>${esc(r.studentNo)}</td><td>${esc(r.name)}</td><td>${r.idMasked}</td><td><span class="status ${r.valid?'ok':'rejected'}">${esc(r.message)}</span></td></tr>`).join('')}</tbody></table></div>`:''}
+      <div class="form-actions"><span class="foot-note" style="margin-right:auto">确认后本轮名单将替换当前届应实习名单</span><button class="btn" onclick="closeStudentImport()">取消</button><button class="btn primary" ${validCount&&!invalidCount?'':'disabled'} onclick="confirmStudentImport()">确认导入并创建账号</button></div>
+    </div></div>`;
+  }
+
+  function renderTeacherDashboard(){
+    const tab=state.dashboardTab||'placement';
+    return shell('teacher','teacher/dashboard',`${head('数据看板',{crumb:'教师端 / 数据反馈',text:'实习落实情况与学生主要问题'},`<select class="select" style="width:130px" onchange="showToast('已切换到 '+this.value)"><option>2026 秋季</option><option>2026 春季</option></select><button class="btn" onclick="showToast('报告已导出')">导出报告</button><button class="btn" onclick="showToast('数据已刷新')">刷新数据</button><button class="btn primary" onclick="openStudentImport()">${state.cohortImported?'重新导入名单':'导入学生名单'}</button>`)}
+      <div class="tabs dashboard-tabs"><button class="tab ${tab==='placement'?'active':''}" onclick="state.dashboardTab='placement';render()">实习落实</button><button class="tab ${tab==='questions'?'active':''}" onclick="state.dashboardTab='questions';render()">学生问题</button></div>
+      ${tab==='placement'?renderPlacementPanel():renderQuestionPanel()}${state.studentImportOpen?renderStudentImportModal():''}`)
+  }
+
+  function renderPlacementPanel(){
+    const imported=state.cohortImported;
+    const shouldIntern=state.cohortSize;
+    const confirmed=imported?0:198;
+    const reviewing=imported?0:16;
+    const filled=imported?0:10;
+    const unfilled=imported?shouldIntern:12;
+    const pending=imported?shouldIntern:38;
+    const rate=shouldIntern?confirmed/shouldIntern*100:0;
+    const rateText=rate.toFixed(1);
+    const rows=imported?state.cohortStudents.slice(0,8).map(s=>[s.name,s.studentNo,'账号已创建','待填报','待提交']):[
+      ['陈静','网传 2023','学院安排','人民日报','未填报'],
+      ['孙悦','广电 2023','自己投递','个人投递','待结果'],
+      ['李明','网传 2023','学院安排','汉阳区融媒体中心','审核中'],
+      ['张琪','新闻 2023','学院安排','新华社新媒体','审核中'],
+      ['周宁','网传 2022','自己投递','个人投递','待结果'],
+      ['王雨','网传 2022','学院安排','南方周末','已确认']
+    ];
+    const units=imported?[['待落实',pending,'#d9dee8']]:[['省级媒体',68,'#3b73f5'],['央媒',52,'#8db3ff'],['商业媒体',44,'#f2b544'],['企业',34,'#d9dee8']];
+    const total=units.reduce((s,u)=>s+u[1],0);
+    let acc=0;
+    const stops=units.map(([name,count,color])=>{const start=acc;acc+=count/total*100;return `${color} ${start}% ${acc}%`;});
+    return `<div class="kpis"><div class="kpi"><div class="k">应实习人数</div><div class="n">${shouldIntern}</div><div class="d">${imported?`已导入名单 · ${shouldIntern} 个账号`:'网传 2023 级 · 2026 秋季'}</div></div><div class="kpi"><div class="k">已落实</div><div class="n">${confirmed}</div><div class="d"><span class="up">${rateText}%</span>单位确认接收</div></div><div class="kpi"><div class="k">待落实</div><div class="n">${pending}</div><div class="d"><span class="warn">${imported?'待完善实习意向':'含个人投递待结果'}</span></div></div><div class="kpi"><div class="k">合作单位</div><div class="n">42</div><div class="d"><span class="up">+3</span>本学期新增</div></div></div>
+      <div class="notice deadline" style="margin-top:12px">${imported?`本届学生名单已导入，共 ${shouldIntern} 人，账号已自动创建。实习落实情况尚未填写，请继续导入或维护学生的实习单位与志愿。`:'距离志愿确认截止还有 5 天，仍有 38 人待落实，其中 12 人尚未填报，9 人个人投递仍在等结果。'}</div>
+      <div class="placement-grid">
+        <div class="card"><div class="card-head"><div><div class="card-title">落实进度</div><div class="card-sub">已落实 = 单位确认接收</div></div><span class="status ok">${rateText}%</span></div><div class="progress-stack"><span style="width:${rate}%;background:#3b73f5"></span><span style="width:${shouldIntern?reviewing/shouldIntern*100:0}%;background:#8db3ff"></span><span style="width:${shouldIntern?filled/shouldIntern*100:0}%;background:#f2b544"></span><span style="width:${shouldIntern?unfilled/shouldIntern*100:0}%;background:#e3e6ec"></span></div><div class="legend"><span><i style="background:#3b73f5"></i>已确认 ${confirmed}</span><span><i style="background:#8db3ff"></i>审核中 ${reviewing}</span><span><i style="background:#f2b544"></i>已填报 ${filled}</span><span><i style="background:#e3e6ec"></i>未填报 ${unfilled}</span></div><div class="foot-note">应实习 ${shouldIntern} 人 · 已落实 ${confirmed} 人 · ${imported?'等待录入落实情况':'较上周 +6.2%'}</div></div>
+        <div class="card"><div class="card-head"><div><div class="card-title">单位分布</div><div class="card-sub">${imported?'当前尚无已确认单位':'已确认的 198 人'}</div></div></div><div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops.join(',')})"><div class="donut-hole"></div><div class="donut-center"><b>${confirmed}</b><span>已确认</span></div></div><div class="donut-legend">${units.map(([name,count,color])=>`<div class="row"><i style="background:${color}"></i><span>${name}</span><span class="n">${count}</span></div>`).join('')}</div></div></div>
+        <div class="card"><div class="card-head"><div><div class="card-title">实习时间轴</div><div class="card-sub">教师可编辑</div></div><button class="btn small" onclick="toggleTimelineEdit()">${state.timelineEdit?'取消':'编辑'}</button></div>${state.timelineEdit?`<form class="timeline-edit" onsubmit="saveTimeline(event)">${state.timeline.map((t,i)=>`<div class="timeline-edit-row"><input class="field" type="date" name="d${i}" value="${t.date}"><input class="field" name="l${i}" value="${t.label}"></div>`).join('')}<div class="form-actions"><button class="btn small primary" type="submit">保存</button></div></form>`:`<div class="timeline">${state.timeline.map(t=>`<div class="timeline-item"><div class="timeline-month">${formatDate(t.date)}</div><div class="timeline-dot"></div><div class="timeline-label">${t.label}</div></div>`).join('')}</div><div class="foot-note">时间节点可按学院安排调整。</div>`}</div>
+      </div>
+      <div class="card" style="margin-top:12px"><div class="card-head"><div><div class="card-title">需要跟进的学生</div><div class="card-sub">${imported?`已自动创建 ${shouldIntern} 个账号 · 显示前 ${rows.length} 人`:'学院安排 / 个人投递'}</div></div><button class="btn small" onclick="showToast('已导出跟进名单')">导出名单</button></div><table class="table"><thead><tr><th>学生</th><th>${imported?'学号':'年级'}</th><th>安排方式</th><th>意向单位</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td><span class="method ${r[2]==='学院安排'||r[2]==='账号已创建'?'college':'self'}">${esc(r[2])}</span></td><td>${esc(r[3])}</td><td><span class="status ${r[4]==='已确认'?'ok':(r[4]==='审核中'||r[4]==='待结果')?'pending':(r[4]==='已填报'||r[4]==='待提交')?'gray':'rejected'}">${esc(r[4])}</span></td><td><button class="btn small" onclick="showToast('已提醒 ${r[0]} 跟进')">提醒</button></td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function toggleTimelineEdit(){state.timelineEdit=!state.timelineEdit;render()}
+  function saveTimeline(e){
+    e.preventDefault();
+    const f=new FormData(e.target);
+    state.timeline=[0,1,2].map(i=>({date:f.get('d'+i)||state.timeline[i].date,label:f.get('l'+i)||state.timeline[i].label}));
+    state.timelineEdit=false;
+    toast('实习时间轴已更新');
+    render();
+  }
+
+  function renderQuestionPanel(){
+    return `<div class="kpis"><div class="kpi"><div class="k">总提问数</div><div class="n">1,284</div><div class="d"><span class="up">+12.4%</span>较上周</div></div><div class="kpi"><div class="k">已回答</div><div class="n">1,102</div><div class="d"><span class="up">85.8%</span>覆盖率</div></div><div class="kpi"><div class="k">未命中</div><div class="n">182</div><div class="d"><span class="warn">14.2%</span>需补语料</div></div><div class="kpi"><div class="k">活跃学生</div><div class="n">${state.cohortSize}</div><div class="d"><span class="up">+8.1%</span>较上周</div></div></div>
+      <div class="grid-2"><div class="col"><div class="card"><div class="card-head"><div><div class="card-title">提问趋势</div><div class="card-sub">近 14 天 · 按天统计</div></div><div class="mini-tabs"><span class="on">按天</span><span>按周</span></div></div><svg width="100%" viewBox="0 0 620 168" fill="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3b73f5" stop-opacity=".18"/><stop offset="1" stop-color="#3b73f5" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="40" x2="620" y2="40" stroke="#eef1f6" stroke-dasharray="3 4"/><line x1="0" y1="85" x2="620" y2="85" stroke="#eef1f6" stroke-dasharray="3 4"/><line x1="0" y1="130" x2="620" y2="130" stroke="#eef1f6" stroke-dasharray="3 4"/><path d="M0 128 L48 118 L96 124 L144 108 L192 96 L240 102 L288 84 L336 90 L384 70 L432 76 L480 56 L528 62 L576 44 L620 36 L620 160 L0 160 Z" fill="url(#area)"/><path d="M0 128 L48 118 L96 124 L144 108 L192 96 L240 102 L288 84 L336 90 L384 70 L432 76 L480 56 L528 62 L576 44 L620 36" stroke="#3b73f5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="620" cy="36" r="4" fill="#fff" stroke="#3b73f5" stroke-width="2.4"/></svg><div class="chart-labels"><span>10-15</span><span>10-18</span><span>10-21</span><span>10-24</span><span>10-27</span><span>10-29</span></div></div><div class="card"><div class="card-head"><div><div class="card-title">高频问题</div><div class="card-sub">近 30 天提问次数</div></div></div>${[['实习周报怎么写',100,126],['融媒体中心实习做什么',78,98],['南方周末实习生要求',60,76],['最近有哪些实习岗位',51,64],['保研流程是什么',33,41]].map(([t,w,n])=>`<div class="q-row"><span class="text">${t}</span><span class="track"><span class="fill" style="width:${w}%"></span></span><span class="num">${n}</span></div>`).join('')}</div></div>
+      <div class="col"><div class="card"><div class="card-head"><div><div class="card-title">内容缺口</div><div class="card-sub">语料未覆盖的问题</div></div><span class="warn">4 项</span></div>${[['保研流程是什么',41],['实习周报模板',37],['新华社实习去向',29],['志愿填报怎么选',21]].map(([t,n])=>`<div class="gap-row"><span class="text">${t}</span><span class="count">${n}</span><span class="tag">补语料</span></div>`).join('')}</div><div class="card"><div class="card-head"><div><div class="card-title">行动建议</div><div class="card-sub">根据内容缺口自动生成</div></div></div><div class="sug"><span class="idx">1</span><span>补充「保研流程」相关语料，预计覆盖 41 次/月提问。</span></div><div class="sug"><span class="idx">2</span><span>为「实习周报」安排一场实务分享会，并沉淀为图文经验。</span></div><div class="sug"><span class="idx">3</span><span>把「新华社实习去向」补进单位库与经验库。</span></div><div class="foot-note">数据来自学生提问日志 · 匿名聚合（k=5）</div></div></div></div>`;
+  }
+
+  function studentRoster(){
+    if(!state.cohortImported)return DATA.students;
+    return state.cohortStudents.map(s=>[s.name,'待补充','待填报','待提交','—',s.studentNo]);
+  }
+  function filteredStudentRows(){
+    const q=state.studentQuery.trim().toLocaleLowerCase('zh-CN');
+    return studentRoster().filter(r=>{
+      return (state.studentFilter==='全部'||r[3]===state.studentFilter)
+        &&(state.studentClassFilter==='全部'||r[1]===state.studentClassFilter)
+        &&(state.studentUnitFilter==='全部'||r[2]===state.studentUnitFilter)
+        &&(!q||[r[0],r[5]||''].join(' ').toLocaleLowerCase('zh-CN').includes(q));
+    });
+  }
+  function activeStudentFilterCount(){
+    return [state.studentFilter,state.studentClassFilter,state.studentUnitFilter].filter(v=>v&&v!=='全部').length;
+  }
+  function toggleStudentFilter(){
+    state.studentFilterOpen=!state.studentFilterOpen;
+    render();
+  }
+  function applyStudentFilters(e){
+    if(e)e.preventDefault();
+    state.studentFilterOpen=false;
+    render();
+  }
+  function searchStudents(e){
+    if(e)e.preventDefault();
+    state.studentQuery=(document.getElementById('studentSearch')?.value||'').trim();
+    render();
+  }
+  function resetStudentFilters(){
+    state.studentFilter='全部';
+    state.studentClassFilter='全部';
+    state.studentUnitFilter='全部';
+    state.studentQuery='';
+    state.studentFilterOpen=false;
+    render();
+  }
+  function renderTeacherStudents(){
+    const rows=filteredStudentRows();
+    const roster=studentRoster();
+    const classOptions=[...new Set(roster.map(r=>r[1]))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+    const unitOptions=[...new Set(roster.map(r=>r[2]))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+    const activeCount=activeStudentFilterCount();
+    const hasConditions=activeCount>0||!!state.studentQuery;
+    const staticStart={'王雨':'2026-09-15','张琪':'2026-10-20','刘洋':'2026-08-01','赵磊':'2026-07-10','周宁':'2026-10-01'};
+    return shell('teacher','teacher/students',`${head('学生台账',{crumb:'教师端 / 学生台账',text:'查看学生志愿、实习状态、开始时间与导师匹配'},`<button class="btn" onclick="showToast('台账已导出')">导出 CSV</button>`)}
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">学生台账</div><div class="card-sub">共 ${roster.length} 名学生，可按班级、实习单位、姓名或学号查找</div></div></div>
+        <div class="student-ledger-toolbar">
+          <form class="student-ledger-search" onsubmit="searchStudents(event)"><input class="field" id="studentSearch" value="${esc(state.studentQuery)}" placeholder="搜索学生姓名 / 学号" aria-label="搜索学生姓名或学号"><button class="btn" type="submit">搜索</button></form>
+          <button class="btn ${state.studentFilterOpen?'primary':''}" onclick="toggleStudentFilter()">筛选${activeCount?`<span class="filter-badge">${activeCount}</span>`:''}</button>
+        </div>
+        ${state.studentFilterOpen?`<form class="student-filter-panel" onsubmit="applyStudentFilters(event)">
+          <div class="student-filter-grid">
+            <div><label class="field-label">班级</label><select class="select" onchange="state.studentClassFilter=this.value">${['全部',...classOptions].map(v=>`<option ${state.studentClassFilter===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+            <div><label class="field-label">实习单位</label><select class="select" onchange="state.studentUnitFilter=this.value">${['全部',...unitOptions].map(v=>`<option ${state.studentUnitFilter===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+            <div><label class="field-label">实习状态</label><select class="select" onchange="state.studentFilter=this.value">${['全部','待提交','审核中','已通过'].map(v=>`<option ${state.studentFilter===v?'selected':''}>${v}</option>`).join('')}</select></div>
+          </div>
+          <div class="student-filter-foot"><span class="foot-note">多个条件同时生效，姓名搜索可以叠加使用</span><button class="btn small" type="button" onclick="resetStudentFilters()">重置</button><button class="btn small primary" type="submit">应用筛选</button></div>
+        </form>`:''}
+        <div class="result-summary"><span>当前显示 ${rows.length} / ${roster.length} 人</span>${hasConditions?`<button onclick="resetStudentFilters()">清除全部条件</button>`:''}</div>
+        <table class="table"><thead><tr><th>学生</th><th>学号</th><th>班级</th><th>意向单位</th><th>状态</th><th>实习开始</th><th>实习导师</th><th>详细信息</th></tr></thead><tbody>${rows.length?rows.map(r=>{const p=profileForStudent(r);const start=p.name==='李明'?(state.internshipStarted?formatDate(state.internshipStartDate):'未开始'):(staticStart[p.name]?formatDate(staticStart[p.name]):'未开始');return `<tr><td>${esc(p.name)}</td><td>${esc(p.studentNo||r[5]||'—')}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="status ${r[3]==='已通过'?'ok':r[3]==='审核中'?'pending':'gray'}">${r[3]}</span></td><td>${start}</td><td>${esc(p.mentor)}</td><td><button class="btn small" onclick="openStudentDetail('${p.name}')">详细信息</button></td></tr>`}).join(''):`<tr><td colspan="8" class="empty">没有找到符合条件的学生<br><button class="btn small" style="margin-top:8px" onclick="resetStudentFilters()">清除筛选条件</button></td></tr>`}</tbody></table>
+      </div>${state.teacherStudentDetail?renderStudentDetailModal():''}`)
+  }
+  function openStudentDetail(name){state.teacherStudentDetail=name;render()}
+  function renderStudentDetailModal(){
+    const row=DATA.students.find(s=>s[0]===state.teacherStudentDetail);
+    if(!row)return '';
+    const p=profileForStudent(row);
+    const period=row[0]==='李明'?(state.internshipStarted?`${formatDate(state.internshipStartDate)} → ${formatDate(state.internshipExpectedEnd||addWeeks(state.internshipStartDate,20))}`:'未开启实习'):'—';
+    return `<div class="modal-bg"><div class="modal" style="width:560px"><div class="modal-head"><h3>实习卡片 · ${esc(p.name)}</h3><button class="modal-close" onclick="state.teacherStudentDetail=null;render()">×</button></div><div class="profile-grid"><div class="profile-row"><b>姓名</b>${esc(p.name)}</div><div class="profile-row"><b>学号</b>${esc(p.studentNo||'—')}</div><div class="profile-row"><b>班级</b>${esc(p.className)}</div><div class="profile-row"><b>实习单位</b>${esc(p.unit)}</div><div class="profile-row"><b>单位部门</b>${esc(p.department)}</div><div class="profile-row"><b>实习导师</b>${esc(p.mentor)}</div><div class="profile-row"><b>导师联系方式</b>${esc(p.mentorContact||'未填写')}</div><div class="profile-row" style="grid-column:1/-1"><b>实习期居住地址</b>${esc(p.address)}</div><div class="profile-row" style="grid-column:1/-1"><b>紧急联系人</b>${esc(p.emergencyContact)} · ${esc(p.emergencyPhone)}</div><div class="profile-row" style="grid-column:1/-1"><b>实习期</b>${period}</div></div></div></div>`;
+  }
+
+  function renderTeacherChallenges(){
+    const jobs=DATA.challengeJobs;
+    const totalApplicants=jobs.reduce((s,j)=>s+j.applicants.length,0);
+    const totalQuota=jobs.reduce((s,j)=>s+j.quota,0);
+    const pending=jobs.reduce((s,j)=>s+j.applicants.filter(a=>a[3]==='待处理').length,0);
+    return shell('teacher','teacher/challenges',`${head('揭榜挂帅',{crumb:'教师端 / 揭榜挂帅',text:'查看企业岗位、学生报名与报录比'},`<button class="btn" onclick="showToast('已导出岗位数据')">导出数据</button>`)}
+      <div class="kpis"><div class="kpi"><div class="k">在招岗位</div><div class="n">${jobs.length}</div><div class="d">来自 ${jobs.length} 家企业</div></div><div class="kpi"><div class="k">收到揭榜</div><div class="n">${totalApplicants}</div><div class="d">学生报名总数</div></div><div class="kpi"><div class="k">平均报录比</div><div class="n">${(totalApplicants/totalQuota).toFixed(1)}:1</div><div class="d">名额 ${totalQuota} 个</div></div><div class="kpi"><div class="k">待企业处理</div><div class="n">${pending}</div><div class="d"><span class="warn">需跟进</span></div></div></div>
+      <div class="notice" style="margin-top:12px">教师可查看企业发布的岗位与学生报名情况；岗位审核与录用由企业完成。</div>
+      <div class="challenge-grid">${jobs.map((j,i)=>`<div class="job-card"><div><div class="card-title">${j.role}</div><div class="job-meta" style="margin-top:5px">${j.company} · ${j.city}</div></div><div class="job-tags"><span class="job-tag">名额 ${j.quota}</span><span class="job-tag">报名 ${j.applicants.length}</span><span class="job-tag">报录比 ${(j.applicants.length/j.quota).toFixed(1)}:1</span></div><div class="job-foot"><span class="points">${j.status}</span><button class="btn small primary" onclick="openChallengeApplicants(${i})">查看报名学生</button></div></div>`).join('')}</div>
+      ${state.teacherChallengeJob!==null?renderChallengeApplicantsModal(state.teacherChallengeJob):''}`)
+  }
+  function openChallengeApplicants(i){state.teacherChallengeJob=i;render()}
+  function renderChallengeApplicantsModal(i){
+    const j=DATA.challengeJobs[i];
+    if(!j)return '';
+    return `<div class="modal-bg"><div class="modal" style="width:620px"><div class="modal-head"><h3>${j.role} · 报名学生</h3><button class="modal-close" onclick="state.teacherChallengeJob=null;render()">×</button></div><div class="job-meta" style="margin-bottom:10px">${j.company} · ${j.city} · 名额 ${j.quota} · 报名 ${j.applicants.length} · 报录比 ${(j.applicants.length/j.quota).toFixed(1)}:1</div><table class="table"><thead><tr><th>学生</th><th>年级</th><th>报名时间</th><th>状态</th></tr></thead><tbody>${j.applicants.map(a=>`<tr><td>${a[0]}</td><td>${a[1]}</td><td>${a[2]}</td><td><span class="status ${a[3]==='已通过'?'ok':'pending'}">${a[3]}</span></td></tr>`).join('')}</tbody></table></div></div>`
+  }
+
+  function renderTeacherReportsLegacy(){
+    const r=state.reports[state.selectedReport]||state.reports[0];
+    const reflect=r.reflect||'通过本周实践，对实习单位的流程和规范有了更具体的理解，也发现了自己在效率与细节上的提升空间。';
+    const plan=r.plan||'下周计划继续跟进当前项目，提升独立完成任务的能力，并补充可量化的产出记录。';
+    const summary=r.summary||'本周完成了既定实习任务，参与了项目执行与内容产出，对工作流程和规范有了更具体的理解。下周将继续提升独立完成任务的能力。';
+    const idx=state.selectedReport;
+    const summaryReady=!!state.summaryGenerated[idx];
+    const summaryFailed=!!state.summaryFailed[idx];
+    setTimeout(()=>startSummary(state.selectedReport),60);
+    return shell('teacher','teacher/reports',`${head('周报评价',{crumb:'教师端 / 周报评价',text:'左侧阅读周报全文，右侧查看 AI 摘要并完成评价'},`<button class="btn" onclick="showToast('已批量提醒未提交学生')">提醒未提交</button>`)}
+      <div class="card report-toolbar">
+        <span class="report-toolbar-label">当前周报</span>
+        <select class="select" style="width:320px" onchange="selectReport(Number(this.value))">${state.reports.map((x,i)=>`<option value="${i}" ${i===state.selectedReport?'selected':''}>${x.student} · ${x.week} · ${x.unit}</option>`).join('')}</select>
+        <span class="report-toolbar-meta">共 ${state.reports.length} 份 · ${state.reports.filter(x=>x.status==='待评价').length} 份待评价</span>
+      </div>
+      <div class="report-layout">
+        <div class="card report-full">
+          <div class="card-head"><div><div class="card-title">${r.student} · ${r.week}</div><div class="card-sub">${r.unit} · 提交于 2026-10-28 21:40</div></div><span class="status ${r.status==='已评价'?'ok':'pending'}">${r.status}</span></div>
+          <div class="report-body">
+            <div class="report-section"><h4>一、本周工作内容</h4><p>${r.content}</p></div>
+            <div class="report-section"><h4>二、收获与反思</h4><p>${reflect}</p></div>
+            <div class="report-section"><h4>三、下周计划</h4><p>${plan}</p></div>
+          </div>
+          <div class="report-foot">周报全文 · 共 ${r.content.length+reflect.length+plan.length} 字</div>
+        </div>
+        <div class="col">
+          <div class="card ai-summary">
+            <div class="card-head"><div><div class="card-title">AI 摘要</div><div class="card-sub">首次打开时生成 · 约 150 字</div></div><span class="ai-badge">${summaryReady?'AI 生成':'按需生成'}</span></div>
+            ${summaryReady?`<div class="summary-text">${summary}</div>`:summaryFailed?`<div class="summary-error"><span>摘要生成失败，请重试</span><button class="btn small" onclick="retrySummary()">重新生成</button></div>`:`<div class="summary-skeleton"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line"></div><div class="sk-note">${state.summaryLoadingIndex===idx?'正在生成摘要…':'打开周报后自动生成，生成一次后直接读取缓存'}</div></div>`}
+          </div>
+          <form class="form-card report-eval-form" onsubmit="scoreReport(event)"><div class="card-title" style="margin-bottom:10px">评分与评语</div><div class="notice" style="margin-bottom:10px">评分规则：共 20 周，每周基础分 6 分；特别优秀 +2、优秀 +1、合格 +0；创新报告 +0.25、被摘录报告 +0.15、延交 -1。</div><div class="form-grid"><div><label class="field-label">报告等级</label><select class="select" name="level"><option>特别优秀</option><option>优秀</option><option selected>合格</option></select></div><div><label class="field-label">附加标签</label><div style="display:flex;flex-direction:column;gap:6px;padding-top:4px"><label class="check"><input type="checkbox" name="innovation"> 创新报告 +0.25</label><label class="check"><input type="checkbox" name="excerpted"> 被摘录报告 +0.15</label><label class="check"><input type="checkbox" name="late"> 延交 -1</label></div></div><div class="full"><label class="field-label">评语</label><textarea class="textarea" name="comment" placeholder="写下对本周周报的反馈"></textarea></div></div><div class="form-actions"><span class="foot-note" style="margin-right:auto">提交后自动计算得分</span><button class="btn primary" type="submit">提交评价</button></div></form>
+        </div>
+      </div>`)
+  }
+  function renderTeacherReportList(){
+    const filter=state.reportFilter;
+    const q=(state.reportQuery||'').trim();
+    const rows=state.reports.filter(r=>(filter==='全部'||r.status===filter)&&(!q||[r.student,r.unit,r.week].join(' ').includes(q)));
+    const pending=state.reports.filter(r=>r.status==='待评价').length;
+    const done=state.reports.filter(r=>r.status==='已评价').length;
+    return shell('teacher','teacher/reports',`${head('周报评价',{crumb:'教师端 / 周报评价',text:'选择一份周报，进入详情阅读全文与 AI 摘要'},`<button class="btn" onclick="showToast('已批量提醒未提交学生')">提醒未提交</button>`)}
+      <div class="card">
+        <div class="report-list-head">
+          <div class="tabs">${['待评价','已评价','全部'].map(f=>`<button class="tab ${filter===f?'active':''}" onclick="state.reportFilter='${f}';render()">${f} (${f==='待评价'?pending:f==='已评价'?done:state.reports.length})</button>`).join('')}</div>
+          <div class="report-search">
+            <input class="field" id="reportSearch" placeholder="搜索学生 / 单位 / 周次" value="${esc(q)}" onkeydown="if(event.key==='Enter'){state.reportQuery=this.value;render()}">
+            <button class="btn" onclick="state.reportQuery=document.getElementById('reportSearch').value;render()">搜索</button>
+          </div>
+        </div>
+        <table class="table report-table"><thead><tr><th>学生</th><th>周次</th><th>实习单位</th><th>提交时间</th><th>本周得分</th><th>状态</th><th>操作</th></tr></thead><tbody>
+          ${rows.length?rows.map(r=>{const i=state.reports.indexOf(r);return `<tr><td>${r.student}</td><td>${r.week}</td><td>${r.unit}</td><td>2026-10-28 21:40</td><td>${r.status==='已评价'&&Number.isFinite(Number(r.score))?`<span class="report-score">${Number(r.score)}<span>分</span></span>`:'<span class="foot-note">—</span>'}</td><td><span class="status ${r.status==='已评价'?'ok':'pending'}">${r.status}</span></td><td><button class="btn small primary" onclick="navigate('teacher/reports/${i}')">查看</button></td></tr>`}).join(''):`<tr><td colspan="7" class="empty">没有符合条件的周报</td></tr>`}
+        </tbody></table>
+        <div class="report-list-foot">共 ${rows.length} 份周报</div>
+      </div>`)
+  }
+
+  function renderTeacherReportDetail(id){
+    const n=Number.isFinite(Number(id))?Math.max(0,Math.min(state.reports.length-1,Number(id))):0;
+    state.selectedReport=n;
+    const r=state.reports[n];
+    const reflect=r.reflect||'通过本周实践，对实习单位的流程和规范有了更具体的理解，也发现了自己在效率与细节上的提升空间。';
+    const plan=r.plan||'下周计划继续跟进当前项目，提升独立完成任务的能力，并补充可量化的产出记录。';
+    const summary=r.summary||'本周完成了既定实习任务，参与了项目执行与内容产出，对工作流程和规范有了更具体的理解。下周将继续提升独立完成任务的能力。';
+    const summaryReady=!!state.summaryGenerated[n];
+    const summaryFailed=!!state.summaryFailed[n];
+    const notice=state.lastScoredReport===n?`<div class="notice" style="margin-bottom:12px">评价已提交 · <a href="#/teacher/reports" style="color:#2f6fed">返回周报列表</a></div>`:'';
+    setTimeout(()=>startSummary(state.selectedReport),60);
+    return shell('teacher','teacher/reports',`${head('周报详情',{crumb:`教师端 / 周报评价 / ${r.student} · ${r.week}`,text:`${r.unit} · 提交于 2026-10-28 21:40`},`<button class="btn" onclick="navigate('teacher/reports')">← 返回列表</button><span class="status ${r.status==='已评价'?'ok':'pending'}">${r.status}</span>`)}
+      ${notice}
+      <div class="report-layout">
+        <div class="card report-full">
+          <div class="card-head"><div><div class="card-title">${r.student} · ${r.week}</div><div class="card-sub">${r.unit} · 提交于 2026-10-28 21:40</div></div><span class="status ${r.status==='已评价'?'ok':'pending'}">${r.status}</span></div>
+          <div class="report-body">
+            <div class="report-section"><h4>一、本周工作内容</h4><p>${r.content}</p></div>
+            <div class="report-section"><h4>二、收获与反思</h4><p>${reflect}</p></div>
+            <div class="report-section"><h4>三、下周计划</h4><p>${plan}</p></div>
+          </div>
+          <div class="report-foot">周报全文 · 共 ${r.content.length+reflect.length+plan.length} 字</div>
+        </div>
+        <div class="col">
+          <div class="card ai-summary">
+            <div class="card-head"><div><div class="card-title">AI 摘要</div><div class="card-sub">首次打开时生成 · 约 150 字</div></div><span class="ai-badge">${summaryReady?'AI 生成':'按需生成'}</span></div>
+            ${summaryReady?`<div class="summary-text">${summary}</div>`:summaryFailed?`<div class="summary-error"><span>摘要生成失败，请重试</span><button class="btn small" onclick="retrySummary()">重新生成</button></div>`:`<div class="summary-skeleton"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line"></div><div class="sk-note">${state.summaryLoadingIndex===n?'正在生成摘要…':'打开周报后自动生成，生成一次后直接读取缓存'}</div></div>`}
+          </div>
+          <form class="form-card report-eval-form" onsubmit="scoreReport(event)"><div class="card-title" style="margin-bottom:10px">评分与评语</div><div class="notice" style="margin-bottom:10px">评分规则：共 20 周，每周基础分 6 分；特别优秀 +2、优秀 +1、合格 +0；创新报告 +0.25、被摘录报告 +0.15、延交 -1。</div><div class="form-grid"><div><label class="field-label">报告等级</label><select class="select" name="level"><option>特别优秀</option><option>优秀</option><option selected>合格</option></select></div><div><label class="field-label">附加标签</label><div style="display:flex;flex-direction:column;gap:6px;padding-top:4px"><label class="check"><input type="checkbox" name="innovation"> 创新报告 +0.25</label><label class="check"><input type="checkbox" name="excerpted"> 被摘录报告 +0.15</label><label class="check"><input type="checkbox" name="late"> 延交 -1</label></div></div><div class="full"><label class="field-label">评语</label><textarea class="textarea" name="comment" placeholder="写下对本周周报的反馈"></textarea></div></div><div class="form-actions"><span class="foot-note" style="margin-right:auto">提交后自动计算得分</span><button class="btn primary" type="submit">提交评价</button></div></form>
+        </div>
+      </div>`)
+  }
+
+  function selectReport(i){state.selectedReport=i;render()}
+  function startSummary(i){
+    if(state.summaryGenerated[i]||state.summaryStarted[i])return;
+    state.summaryStarted[i]=true;
+    state.summaryLoadingIndex=i;
+    render();
+    setTimeout(()=>{
+      state.summaryGenerated[i]=true;
+      state.summaryFailed[i]=false;
+      if(state.summaryLoadingIndex===i)state.summaryLoadingIndex=null;
+      render();
+      toast('AI 摘要已生成');
+    },1200);
+  }
+  function retrySummary(){
+    const i=state.selectedReport;
+    state.summaryGenerated[i]=false;
+    state.summaryStarted[i]=false;
+    state.summaryFailed[i]=false;
+    state.summaryLoadingIndex=null;
+    render();
+    setTimeout(()=>startSummary(i),50);
+    toast('正在重新生成摘要…');
+  }
+  function scoreReport(e){
+    e.preventDefault();
+    const f=new FormData(e.target);
+    const level=f.get('level')||'合格';
+    let score=6;
+    const tags=[];
+    if(level==='特别优秀')score+=2;
+    if(level==='优秀')score+=1;
+    if(f.get('innovation')){score+=0.25;tags.push('创新报告')}
+    if(f.get('excerpted')){score+=0.15;tags.push('被摘录报告')}
+    if(f.get('late')){score-=1;tags.push('延交')}
+    score=Math.round(score*100)/100;
+    const r=state.reports[state.selectedReport];
+    r.status='已评价';
+    r.level=level;
+    r.score=score;
+    r.tags=tags;
+    r.comment=f.get('comment')||'';
+    if(r.student===state.studentProfile.name){
+      let studentReport=state.studentHistory.find(x=>x.week===r.week);
+      if(!studentReport){
+        studentReport={week:r.week};
+        state.studentHistory.unshift(studentReport);
+      }
+      Object.assign(studentReport,{status:'已评价',level,score,tags:[...tags],comment:r.comment});
+    }
+    state.lastScoredReport=state.selectedReport;
+    toast('评价已提交，本次得分 '+score);
+    render();
+  }
+
+  function renderEnterpriseJobs(){
+    return shell('enterprise','enterprise/jobs',`${head('发布岗位',{crumb:'企业端 / 岗位管理',text:'发布实习岗位，查看学生揭榜情况'},'')}
+      <div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="k">在招岗位</div><div class="n">${state.jobs.filter(j=>j[4]==='在招').length}</div><div class="d">本月新增 2 个</div></div><div class="kpi"><div class="k">收到揭榜</div><div class="n">12</div><div class="d"><span class="up">+4</span>较上周</div></div><div class="kpi"><div class="k">已录用</div><div class="n">5</div><div class="d">本月累计</div></div></div>
+      <div class="card" style="margin-top:12px"><div class="card-head"><div class="card-title">我发布的岗位</div></div><table class="table"><thead><tr><th>岗位</th><th>城市</th><th>要求</th><th>名额</th><th>状态</th><th>操作</th></tr></thead><tbody>${state.jobs.map((j,i)=>`<tr><td>${j[0]}</td><td>${j[1]}</td><td>${j[2]}</td><td>${j[3]}</td><td><span class="status ${j[4]==='在招'?'ok':'gray'}">${j[4]}</span></td><td><button class="btn small" onclick="showToast('编辑 ${j[0]}')">编辑</button> ${j[4]==='在招'?`<button class="btn small danger" onclick="closeJob(${i})">结束</button>`:''}</td></tr>`).join('')}</tbody></table></div>
+      <form class="form-card" id="jobForm" style="margin-top:12px" onsubmit="publishJob(event)"><div class="card-title" style="margin-bottom:12px">发布新岗位</div><div class="form-grid"><div><label class="field-label">岗位名称</label><input class="field" name="title" placeholder="如：新媒体编辑" required></div><div><label class="field-label">城市</label><input class="field" name="city" placeholder="如：武汉" required></div><div><label class="field-label">实习要求</label><input class="field" name="req" placeholder="如：3 个月 · 每周 4 天"></div><div><label class="field-label">名额</label><input class="field" name="quota" type="number" min="1" value="1"></div><div class="full"><label class="field-label">岗位描述</label><textarea class="textarea" placeholder="工作内容、能力要求、mentor 信息"></textarea></div></div><div class="form-actions"><button class="btn primary" type="submit">发布岗位</button></div></form>`)
+  }
+  function closeJob(i){state.jobs[i][4]='已结束';toast('岗位已结束');render()}
+  function publishJob(e){e.preventDefault();const f=new FormData(e.target);state.jobs.unshift([f.get('title'),f.get('city'),f.get('req')||'—',f.get('quota')||'1','在招']);toast('岗位已发布');render()}
+
+  function renderEnterpriseScoring(){
+    const list=DATA.interns.filter(x=>x[2]===(state.scoringTab==='pending'?'待评分':'已评分'));
+    const pendingCount=DATA.interns.filter(x=>x[2]==='待评分').length;
+    const doneCount=DATA.interns.filter(x=>x[2]==='已评分').length;
+    return shell('enterprise','enterprise/scoring',`${head('实习评分',{crumb:'企业端 / 实习评分',text:'mentor 直接评分，替代学生自填评语'},`<button class="btn" onclick="showToast('评分标准已下载')">评分标准</button>`)}
+      <div class="tabs" style="margin-bottom:12px"><button class="tab ${state.scoringTab==='pending'?'active':''}" onclick="state.scoringTab='pending';render()">待评分 (${pendingCount})</button><button class="tab ${state.scoringTab==='done'?'active':''}" onclick="state.scoringTab='done';render()">已评分 (${doneCount})</button></div>
+      <div class="card"><table class="table"><thead><tr><th>实习生</th><th>实习单位</th><th>状态</th><th>操作</th></tr></thead><tbody>${list.map((x,i)=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td><span class="status ${x[2]==='已评分'?'ok':'pending'}">${x[2]}</span></td><td>${x[2]==='待评分'?`<button class="btn small primary" onclick="openScore('${x[0]}')">评分</button>`:`<button class="btn small" onclick="showToast('已打开 ${x[0]} 的评分详情')">查看</button>`}</td></tr>`).join('')}</tbody></table></div>
+      ${state.scoringTarget?`<div class="modal-bg"><div class="modal"><div class="modal-head"><h3>${state.scoringTarget} · 实习评分</h3><button class="modal-close" onclick="state.scoringTarget=null;render()">×</button></div><form onsubmit="submitScore(event)"><div class="form-grid"><div><label class="field-label">专业能力</label><select class="select" name="s1">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div><div><label class="field-label">工作态度</label><select class="select" name="s2">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div><div><label class="field-label">协作沟通</label><select class="select" name="s3">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div><div><label class="field-label">成长潜力</label><select class="select" name="s4">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div><div class="full"><label class="field-label">评语</label><textarea class="textarea" name="comment" placeholder="写下对该实习生的评价"></textarea></div></div><div class="form-actions"><button type="button" class="btn" onclick="state.scoringTarget=null;render()">取消</button><button class="btn primary" type="submit">提交评分</button></div></form></div></div>`:''}`)
+  }
+  function openScore(name){state.scoringTarget=name;render()}
+  function submitScore(e){e.preventDefault();const x=DATA.interns.find(i=>i[0]===state.scoringTarget);if(x)x[2]='已评分';state.scoringTarget=null;toast('评分已提交');render()}
+
+  function renderEnterpriseApplications(){
+    const filter=state.applicationFilter;
+    const filters=['待处理','已通过','已拒绝','全部'];
+    const countFor=status=>status==='全部'?state.applications.length:state.applications.filter(a=>a[3]===status).length;
+    const rows=state.applications.map((application,index)=>({application,index})).filter(({application})=>filter==='全部'||application[3]===filter);
+    return shell('enterprise','enterprise/applications',`${head('揭榜管理',{crumb:'企业端 / 揭榜管理',text:'处理学生揭榜申请，确认面试与录用'},`<button class="btn" onclick="showToast('已导出揭榜名单')">导出名单</button>`)}
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">学生揭榜申请</div><div class="card-sub">当前显示 ${rows.length} 份 · 共 ${state.applications.length} 份</div></div></div>
+        <div class="tabs" style="margin-bottom:12px">${filters.map(status=>`<button class="tab ${filter===status?'active':''}" onclick="state.applicationFilter='${status}';render()">${status} (${countFor(status)})</button>`).join('')}</div>
+        <table class="table"><thead><tr><th>学生</th><th>岗位</th><th>揭榜时间</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.length?rows.map(({application:a,index:i})=>`<tr><td>${a[0]}</td><td>${a[1]}</td><td>${a[2]}</td><td><span class="status ${a[3]==='已通过'?'ok':a[3]==='已拒绝'?'rejected':'pending'}">${a[3]}</span></td><td><div class="application-actions"><button class="btn small view-action" onclick="openApplicationDetail(${i})">查看资料</button>${a[3]==='待处理'?`<div class="decision-group"><button class="btn small approve" onclick="reviewApp(${i},true)">✓ 通过申请</button><button class="btn small reject" onclick="reviewApp(${i},false)">× 拒绝申请</button></div>`:''}</div></td></tr>`).join(''):`<tr><td colspan="5" class="empty">当前没有${filter==='全部'?'':esc(filter)}的揭榜申请</td></tr>`}</tbody></table>
+      </div>${state.applicationDetail!==null?renderApplicationDetailModal():''}`)
+  }
+  function reviewApp(i,ok){state.applications[i][3]=ok?'已通过':'已拒绝';toast(ok?'已通过该揭榜申请':'已拒绝该揭榜申请');render()}
+  function openApplicationDetail(i){state.applicationDetail=i;render()}
+  function renderApplicationDetailModal(){
+    const i=state.applicationDetail;
+    const application=state.applications[i];
+    if(!application)return '';
+    const row=DATA.students.find(s=>s[0]===application[0]);
+    const p=profileForStudent(row);
+    const profiles={
+      '李明':{phone:'138 0000 1234',email:'liming@whu.edu.cn',direction:'融媒体采编 / 短视频',intro:'具有公众号排版、现场采访和短视频剪辑经验，希望进入融媒体一线完成采编全流程实践。',skills:['公众号排版','PR 剪辑','现场采访'],resume:'李明-融媒体采编简历.pdf',resumeSize:'286 KB',resumeUrl:'assets/resumes/李明-融媒体采编简历.pdf',portfolio:'江滩文旅短视频作品集.pdf'},
+      '张琪':{phone:'139 0000 5678',email:'zhangqi@whu.edu.cn',direction:'短视频运营 / 内容策划',intro:'熟悉短视频选题、脚本与平台运营，有校园账号内容策划经验。',skills:['短视频策划','数据分析','脚本写作'],resume:'张琪-短视频运营简历.pdf',resumeSize:'312 KB',resumeUrl:'assets/resumes/张琪-短视频运营简历.pdf',portfolio:'校园账号运营案例.pdf'},
+      '王雨':{phone:'136 0000 2468',email:'wangyu@whu.edu.cn',direction:'内容运营 / 新闻采编',intro:'有校园媒体采写与内容运营经历，关注社会议题和深度报道。',skills:['新闻采写','内容运营','事实核查'],resume:'王雨-内容运营简历.pdf',resumeSize:'274 KB',resumeUrl:'assets/resumes/王雨-内容运营简历.pdf',portfolio:'社区采访作品集.pdf'},
+      '陈静':{phone:'137 0000 1357',email:'chenjing@whu.edu.cn',direction:'新媒体编辑 / 品牌传播',intro:'擅长内容编辑与视觉排版，参与过校园公众号专题策划。',skills:['新媒体编辑','视觉排版','专题策划'],resume:'陈静-新媒体编辑简历.pdf',resumeSize:'298 KB',resumeUrl:'assets/resumes/陈静-新媒体编辑简历.pdf',portfolio:'校园专题策划作品.pdf'},
+      '周宁':{phone:'135 0000 8642',email:'zhouning@whu.edu.cn',direction:'短视频运营 / 用户增长',intro:'关注短视频平台内容生态，具备账号增长和社群运营经验。',skills:['账号运营','社群维护','剪辑基础'],resume:'周宁-短视频运营简历.pdf',resumeSize:'305 KB',resumeUrl:'assets/resumes/周宁-短视频运营简历.pdf',portfolio:'账号增长复盘.pdf'}
+    };
+    const detail=profiles[application[0]]||{phone:'联系方式未填写',email:'邮箱未填写',direction:'待补充',intro:'学生暂未补充个人简介。',skills:[],resume:'简历待上传',resumeSize:'—',resumeUrl:'',portfolio:'暂未上传作品集'};
+    const phone=detail.phone;
+    return `<div class="modal-bg"><div class="modal" style="width:680px"><div class="modal-head"><div><h3>学生揭榜资料 · ${esc(application[0])}</h3><div class="job-meta" style="margin-top:4px">${esc(application[1])} · 揭榜于 ${esc(application[2])}</div></div><button class="modal-close" onclick="state.applicationDetail=null;render()">×</button></div>
+      <div class="profile-grid" style="margin-bottom:12px"><div class="profile-row"><b>姓名</b>${esc(p.name)}</div><div class="profile-row"><b>学号</b>${esc(p.studentNo||'—')}</div><div class="profile-row"><b>班级</b>${esc(row?.[1]||p.className)}</div><div class="profile-row"><b>当前状态</b><span class="status ${application[3]==='已通过'?'ok':application[3]==='已拒绝'?'rejected':'pending'}">${application[3]}</span></div><div class="profile-row"><b>联系电话</b>${esc(phone)}</div><div class="profile-row"><b>联系邮箱</b>${esc(detail.email)}</div></div>
+      <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:10px"><div class="card" style="padding:12px"><div class="card-title" style="margin-bottom:6px">求职方向</div><div class="job-meta" style="margin-bottom:8px">${esc(detail.direction)}</div><div class="answer-body" style="font-size:11.5px;line-height:1.75">${esc(detail.intro)}</div><div class="job-tags" style="margin-top:10px">${detail.skills.map(skill=>`<span class="job-tag">${esc(skill)}</span>`).join('')}</div></div>
+      <div class="card resume-file-card" style="padding:12px"><div class="card-head" style="margin-bottom:6px"><div class="card-title">简历与作品</div>${ICONS.doc}</div><div class="profile-row"><b>简历</b>${esc(detail.resume)}</div><div class="profile-row"><b>文件大小</b>${esc(detail.resumeSize)}</div><div class="profile-row"><b>作品集</b>${esc(detail.portfolio)}</div><div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap"><a class="btn small" href="${esc(detail.resumeUrl)}" target="_blank" rel="noopener">查看简历原件</a><a class="btn small" href="${esc(detail.resumeUrl)}" download="${esc(detail.resume)}">下载简历 PDF</a></div></div></div>
+      ${application[3]==='待处理'?`<div class="form-actions"><button class="btn reject" onclick="reviewApp(${i},false)">× 拒绝申请</button><button class="btn approve" onclick="reviewApp(${i},true)">✓ 通过申请</button></div>`:`<div class="foot-note" style="margin-top:12px">${application[3]==='已通过'?'申请已通过，可联系学生安排后续流程。':'该申请已拒绝，如需重新评估可返回列表处理。'}</div>`}
+    </div></div>`;
+  }
+
+  const ROUTES={
+    'login':renderLogin,
+    'student/chat':renderChat,
+    'student/volunteer':renderVolunteer,
+    'student/internship':renderInternship,
+    'student/profile':renderStudentProfile,
+    'student/challenges':renderChallenges,
+    'teacher/dashboard':renderTeacherDashboard,
+    'teacher/students':renderTeacherStudents,
+    'teacher/challenges':renderTeacherChallenges,
+    'teacher/reports':renderTeacherReportList,
+    'enterprise/jobs':renderEnterpriseJobs,
+    'enterprise/scoring':renderEnterpriseScoring,
+    'enterprise/applications':renderEnterpriseApplications
+  };
+
+  function render(){
+    const params=new URLSearchParams(location.search);
+    if(params.get('theme')==='dark')state.theme='dark';
+    if(params.get('settings')==='1')state.settingsOpen=true;
+    if(params.get('tab')==='placement')state.dashboardTab='placement';
+    if(params.get('tab')==='questions')state.dashboardTab='questions';
+    if(params.get('timeline')==='edit')state.timelineEdit=true;
+    if(params.get('import')==='open')state.studentImportOpen=true;
+    if(params.get('import')==='sample'){
+      const parsed=parseStudentImportCsv(STUDENT_IMPORT_SAMPLE_CSV);
+      state.studentImportOpen=true;
+      state.studentImportFileName='示例学生名单.csv';
+      state.studentImportRows=parsed.rows;
+      state.studentImportError=parsed.error;
+    }
+    if(params.get('import')==='imported'){
+      const parsed=parseStudentImportCsv(STUDENT_IMPORT_SAMPLE_CSV);
+      state.cohortStudents=parsed.rows.filter(r=>r.valid).map(r=>({studentNo:r.studentNo,name:r.name,idMasked:r.idMasked,accountStatus:'已创建'}));
+      state.cohortSize=state.cohortStudents.length;
+      state.cohortImported=true;
+    }
+    if(params.has('job'))state.teacherChallengeJob=Number(params.get('job'));
+    if(params.has('student'))state.teacherStudentDetail=params.get('student');
+    if(params.get('sfilter')==='open')state.studentFilterOpen=true;
+    if(params.has('sclass'))state.studentClassFilter=params.get('sclass');
+    if(params.has('sunit'))state.studentUnitFilter=params.get('sunit');
+    if(params.has('sstatus'))state.studentFilter=params.get('sstatus');
+    if(params.has('sq'))state.studentQuery=params.get('sq');
+    if(params.has('reportfilter'))state.reportFilter=params.get('reportfilter');
+    if(params.has('feedback'))state.reportFeedback=params.get('feedback');
+    if(params.get('reportfiles')==='1'){
+      state.reportDraftHtml='<p>本周完成「汉阳知音」公众号推文排版 3 篇，参与江滩文旅短视频拍摄，并独立完成 1 条 45 秒竖屏视频粗剪。</p><p>下周计划继续跟进文旅选题，提升同期声收音质量。</p>';
+      state.reportImages=[{name:'江滩采访现场.jpg',size:860000}];
+      state.reportAttachments=[{name:'第6周工作清单.pdf',size:420000}];
+    }
+    if(params.get('chat')==='record')state.chatMode='record';
+    if(params.get('chat')==='qa')state.chatMode='qa';
+    if(params.get('internship')==='started'){state.internshipStarted=true;state.internshipStartDate='2026-10-01';state.internshipExpectedEnd='2027-02-18';state.internshipStartEdits=0}
+    if(params.get('internship')==='notstarted'){state.internshipStarted=false}
+    if(params.get('files')==='1'){
+      state.resumeFile={name:'李明-简历.pdf',size:286000};
+      state.portfolioFiles=[{name:'融媒体实习作品集.pdf',size:1850000},{name:'短视频截图.zip',size:420000}];
+    }
+    document.documentElement.dataset.theme=state.theme;
+    const path=(location.hash.replace(/^#\/?/, '')||'login');
+    if(path!=='login'){state.role=path.split('/')[0]}
+    let fn=ROUTES[path];
+    const reportDetail=path.match(/^teacher\/reports\/(\d+)$/);
+    if(reportDetail)fn=()=>renderTeacherReportDetail(Number(reportDetail[1]));
+    if(!fn)fn=renderLogin;
+    document.getElementById('app').innerHTML=fn();
+    document.querySelector('main')?.scrollTo(0,0);
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',render);
+  render();
+</script>
+</body>
+</html>
